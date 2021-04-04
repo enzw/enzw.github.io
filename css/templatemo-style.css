@@ -367,7 +367,7 @@ ul {
 
 .about-content {
   height: 100vh;
-  background-color: rgba(45, 58, 75, 0.5);
+  background-color: #c2b092;
   padding: 0px 60px;
   position: relative;
   margin: 0 auto;
@@ -431,7 +431,7 @@ ul {
 
 .projects-content {
   height: 100vh;
-  background-color: rgba(45, 58, 75, 0.5);
+  background-color: #c2b092;
   padding: 0px 60px;
   position: relative;
   margin: 0 auto;
