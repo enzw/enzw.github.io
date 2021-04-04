@@ -295,7 +295,7 @@ ul {
 
 .home-content {
 	height: 90vh;
-	background-color: #c2b092;
+	background-color: rgba(45, 58, 75, 0.5);
 	padding: 0px 60px;
 	position: relative;
 	margin: 10vh auto 0 auto;
@@ -318,7 +318,7 @@ ul {
 
 .home-content .home-box-content {
   margin-top: 45px;
-	background-color: #a1cae2;
+	background-color: #455871;
 	position: relative;
 	right: -100px;
 	padding: 30px;
@@ -367,7 +367,7 @@ ul {
 
 .about-content {
   height: 100vh;
-  background-color: #c2b092;
+  background-color: rgba(45, 58, 75, 0.5);
   padding: 0px 60px;
   position: relative;
   margin: 0 auto;
@@ -431,7 +431,7 @@ ul {
 
 .projects-content {
   height: 100vh;
-  background-color: #c2b092;
+  background-color: rgba(45, 58, 75, 0.5);
   padding: 0px 60px;
   position: relative;
   margin: 0 auto;
