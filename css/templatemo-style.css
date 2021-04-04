@@ -295,7 +295,7 @@ ul {
 
 .home-content {
 	height: 90vh;
-	background-color: #c2b092;
+	background-color: c2b092;
 	padding: 0px 60px;
 	position: relative;
 	margin: 10vh auto 0 auto;
@@ -318,7 +318,7 @@ ul {
 
 .home-content .home-box-content {
   margin-top: 45px;
-	background-color: #455871;
+	background-color: #a1cae2;
 	position: relative;
 	right: -100px;
 	padding: 30px;
