@@ -110,7 +110,7 @@
     function startFlowerRain() {
       const flowers = ['🌸', '🌷', '💐', '🌺', '🌹', '✨', '🫧'];
       setInterval(() => {
-        if (Math.random() < 0.5) return; // Membatasi jumlah bunga yang turun
+        if (Math.random() < 0.5) return;
         const flower = document.createElement('div');
         flower.className = 'flower';
         flower.textContent = flowers[Math.floor(Math.random() * flowers.length)];
