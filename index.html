@@ -39,7 +39,6 @@
         #clock {
             font-size: 6em;
             font-weight: bold;
-
         }
 
         #date {
@@ -92,6 +91,13 @@
                 startConfetti();
             }
 
+            if (day === 30 && month === 9) {
+                document.getElementById('clock').style.color = 'gold';
+                document.getElementById('clock').style.textShadow = '0 0 20px rgba(255, 215, 0, 1)';
+            } else {
+                document.getElementById('clock').style.textShadow = '0 0 7px ';
+            }
+            
             updateCountdown();
         }
 
