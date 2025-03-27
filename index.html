@@ -158,10 +158,10 @@
 
     function updateCountdown() {
       const now = new Date();
-      let targetDate = new Date(now.getFullYear(), 9, 30);
+      let targetDate = new Date(now.getFullYear(), 8, 30);
       
       if (now > targetDate) {
-        targetDate = new Date(now.getFullYear() + 1, 9, 30);
+        targetDate = new Date(now.getFullYear() + 1, 8, 30);
       }
 
       const diff = targetDate - now;
