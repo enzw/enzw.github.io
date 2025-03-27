@@ -2,6 +2,8 @@
 
 body {
   font-family: 'Roboto Mono', monospace;
+  background: #121212;
+  margin: 25px;
 }
 
 .retro-container {
