@@ -69,8 +69,6 @@
       document.getElementById('year').textContent = year;
 
       if (day === 14 && month === 2) {
-        const video = document.getElementById('video-background');
-        video.style.display = 'block';
         //document.getElementById('clock').style.textShadow = '0 0 20px #FE6DC5';
         document.getElementById('button').style.display = 'block';
         if (!window.flowerStarted) {
@@ -78,13 +76,20 @@
           setInterval(createFlower, 300); 
         }
       } else {
-        const video = document.getElementById('video-background');
-        video.style.display = 'none';
         document.getElementById('clock').style.textShadow = 'none';
         document.getElementById('button').style.display = 'none';
       }
 
       updateCountdown();
+    }
+
+    function hideVideo() {
+      const now = new Date();
+      const day = now.getDate();
+      const month = now.getMonth() + 1;
+
+      const video = document.getElementById('video-background')
+      video.style.display = ((day === 30 && month === 9) || (day === 14 && month === 2)) ? 'block' : 'none';
     }
 
     function hideConfettiButton() {
@@ -93,7 +98,7 @@
       const month = now.getMonth() + 1;
 
       document.getElementById('confetti').style.display = 
-        ((day === 30 && month === 9) || (day === 12 && month === 8)) ? 'block' : 'none';  
+        ((day === 30 && month === 9) || (day === 12 && month === 2)) ? 'block' : 'none';  
     }
 
     function startConfetti() {
@@ -135,6 +140,7 @@
       updateClock();
       hideButton();
       hideConfettiButton();
+      hideVideo()
     };
   </script>
 </body>
