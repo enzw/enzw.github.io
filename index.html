@@ -70,14 +70,12 @@
 
       if (day === 14 && month === 2) {
         //document.getElementById('clock').style.textShadow = '0 0 20px #FE6DC5';
-        document.getElementById('button').style.display = 'block';
         if (!window.flowerStarted) {
           window.flowerStarted = true;
           setInterval(createFlower, 300); 
         }
       } else {
         document.getElementById('clock').style.textShadow = 'none';
-        document.getElementById('button').style.display = 'none';
       }
 
       updateCountdown();
