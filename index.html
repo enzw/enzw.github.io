@@ -56,9 +56,8 @@
       color: gray;
       font-size: 0.9em;
       opacity: 0.5;
-      margin-top: 25px;
     }
-
+    
     iframe {
       border-radius: 12px;
       width: 50%;
@@ -71,18 +70,18 @@
       padding: 10px 20px;
       font-size: 1.2em;
       font-weight: bold;
-      color: white;
-      background: purple;
+      color: purple;
+      background: white;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      margin-bottom: 35px;
+      margin-top: 35px;
       transition: all 0.3s ease;
       text-decoration: none;
     }
 
     .button:hover {
-      box-shadow: 0 0 20px purple;
+      box-shadow: 0 0 20px pink;
       background: white;
       color: purple;
     }
@@ -136,16 +135,16 @@
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
             loading="lazy"></iframe>
 
-    <a href="cus.html" class="button" id="button">Happy Birthday!</a>
-
     <div id="countdown"></div>
+
+    <a href="cus.html" class="button" id="button">Happy Birthday!</a>
 
   </div>
 
   <script>
     function createFlower() {
     let flower = document.createElement("div");
-    flower.innerHTML = "🌸 , nigga";
+    flower.innerHTML = "🌸";
     flower.style.textShadow = "0 0 100px pink";
     flower.classList.add("flower");
     let randomX = Math.random() * window.innerWidth;
@@ -180,8 +179,7 @@
       }
 
       if ((day === 29 && month === 3) || (day === 30 && month === 9)) {
-        document.getElementById('clock').style.textShadow = '0 0 20px purple';
-        document.getElementById('clock').style.animation = 'fall 1s once';
+        document.getElementById('clock').style.textShadow = '0 0 20px pink';
         document.getElementById('button').style.display = 'block';
         if (!window.flowerStarted) {
           window.flowerStarted = true;
@@ -191,11 +189,6 @@
         document.getElementById('clock').style.textShadow = 'none';
       }
 
-      if (day === 30 && month === 9) {
-        document.getElementById('button').style.display = 'block';
-      } else {
-        document.getElementById('button').style.display = 'none';
-      }
       updateCountdown();
     }
 
