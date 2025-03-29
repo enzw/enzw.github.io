@@ -72,7 +72,7 @@
       font-size: 1.2em;
       font-weight: bold;
       color: white;
-      background: #9D0039;
+      background: purple;
       border: none;
       border-radius: 8px;
       cursor: pointer;
@@ -82,10 +82,43 @@
     }
 
     .button:hover {
-      box-shadow: 0 0 20px rgb(2, 163, 75);
-      background: #18a647;
+      box-shadow: 0 0 20px purple;
+      background: white;
+      color: purple;
     }
 
+    #year{
+      font-size: 29em;
+      font-weight: bold;
+      opacity: 1%;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: -1;
+      position: absolute;
+      top: 0;
+      left: 0;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .flower {
+    position: absolute;
+    font-size: 24px;
+    pointer-events: none;
+    top: 0;
+  }
+
+  @keyframes fall {
+    0% {
+      transform: translateY(-100vh) rotate(0deg);
+    }
+    100% {
+      transform: translateY(100vh) rotate(360deg);
+    }
+  }
   </style>
 </head>
 <body id="body">
@@ -94,6 +127,7 @@
     <div>
       <div id="clock"></div>
       <div id="date"></div>
+      <div id="year"></div>
     </div>
     
     <iframe src="https://open.spotify.com/embed/playlist/5hHoTypkiCOKbRDbEHjHW1?utm_source=generator&theme=0" 
@@ -105,9 +139,25 @@
     <a href="cus.html" class="button" id="button">Happy Birthday!</a>
 
     <div id="countdown"></div>
+
   </div>
 
   <script>
+    function createFlower() {
+    let flower = document.createElement("div");
+    flower.innerHTML = "🌸 , nigga";
+    flower.style.textShadow = "0 0 100px pink";
+    flower.classList.add("flower");
+    let randomX = Math.random() * window.innerWidth;
+    flower.style.left = `${randomX}px`;
+    let randomSize = Math.random() * 20 + 20;
+    flower.style.fontSize = `${randomSize}px`;
+    let randomSpeed = Math.random() * 20 + 2 ;
+    flower.style.animation = `fall ${randomSpeed}s linear infinite`;
+    document.body.appendChild(flower);
+    setTimeout(() => flower.remove(), randomSpeed * 1000);
+    }
+
     function updateClock() {
       const now = new Date();
       const hh = String(now.getHours()).padStart(2, '0');
@@ -122,23 +172,30 @@
       const day = now.getDate();
       const month = now.getMonth() + 1;
       const year = now.getFullYear();
-      document.getElementById('date').textContent = `${dayName}, ${day} ${months[now.getMonth()]} ${year}`;
+      document.getElementById('date').textContent = `${dayName}, ${day} ${months[now.getMonth()]}`;
+      document.getElementById('year').textContent = year;
 
       if ((day === 12 && month === 8) || (day === 30 && month === 9)) {
         startConfetti();
       }
 
-      if ((day === 14 && month === 2) || (day === 30 && month === 9)) {
-        document.getElementById('clock').style.color = 'pink';
-        document.getElementById('clock').style.textShadow = '0 0 20px rgba(255, 105, 180, 1)';
-        document.getElementById('body').style.backgroundImage = "url('images/background.jpg')";
-        document.body.style.backgroundSize = "cover";
-        document.body.style.backgroundPosition = "center";
-        document.body.style.backgroundRepeat = "no-repeat";
+      if ((day === 29 && month === 3) || (day === 30 && month === 9)) {
+        document.getElementById('clock').style.textShadow = '0 0 20px purple';
+        document.getElementById('clock').style.animation = 'fall 1s once';
+        document.getElementById('button').style.display = 'block';
+        if (!window.flowerStarted) {
+          window.flowerStarted = true;
+          setInterval(createFlower, 300); 
+        }
       } else {
         document.getElementById('clock').style.textShadow = 'none';
       }
 
+      if (day === 30 && month === 9) {
+        document.getElementById('button').style.display = 'block';
+      } else {
+        document.getElementById('button').style.display = 'none';
+      }
       updateCountdown();
     }
 
