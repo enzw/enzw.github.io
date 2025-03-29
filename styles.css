@@ -113,7 +113,7 @@
   z-index: -3;
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, #2a8cdb 65%, #34a853 35%);
+  background: radial-gradient(circle, #34a853 35%, #2a8cdb 75%);
   border-radius: 50%;
   position: absolute;
   bottom: 50px;
@@ -121,7 +121,7 @@
   transform: translateX(-50%);
   box-shadow: 0 0 20px lightblue;
   animation : eclipse 60s infinite alternate-reverse;
-  filter: blur(10px);
+  filter: blur(20px);
   display: none;
 }
 
