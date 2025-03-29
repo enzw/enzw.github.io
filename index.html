@@ -36,37 +36,36 @@
   </div>
 
   <script>
+
     function createFlower() {
     let flower = document.createElement("div");
-    let jawa = ['❄︎', '🌸', '🍁', '★', ''];
+
+    let jawa = ['❄︎', '🌸', '🍁', ''];
     let now = new Date();
     let jam = String(now.getHours()).padStart(2, '0');
     let month = now.getMonth() + 1;
     let day = now.getDate();
-    let randomJawa;
+    let jawaPIlihan;
 
     if (month === 12 || month === 1 || month === 2) {
-        randomJawa = jawa[0];
+        jawaPIlihan = jawa[0];
         flower.style.textShadow = "0px 0px 15px white";
     } else if (day === 14 && month === 2) {
-        randomJawa = jawa[1];
+        jawaPIlihan = jawa[1];
         flower.style.textShadow = "0px 0px 15px #FE6DC5";
     } else if (month === 9 || month === 10 || month === 11) {
-        randomJawa = jawa[2];
-    }  else if (jam >= 18 || jam <= 4){
-        randomJawa = jawa[3];
-        flower.style.textShadow = "0px 0px 15px white";
+        jawaPIlihan = jawa[2];
     } else {
-      randomJawa = jawa[4];
+      jawaPIlihan = jawa[3];
     }
 
-    flower.innerHTML = randomJawa;
+    flower.innerHTML = jawaPIlihan;
     flower.classList.add("flower");
 
     let randomX = Math.random() * window.innerWidth;
     flower.style.left = `${randomX}px`;
 
-    let randomSize = Math.random() * 20 + 20;
+    let randomSize = Math.random() * 20 + 10;
     flower.style.fontSize = `${randomSize}px`;
 
     let randomSpeed = Math.random() * 20 + 2;
