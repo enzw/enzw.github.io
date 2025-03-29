@@ -101,6 +101,7 @@
   pointer-events: none;
   top: 0;
   text-shadow: 0 0 10px #FE6DC5;
+  -ms-flex-item-align: center;
 }
 
 @keyframes fall {
