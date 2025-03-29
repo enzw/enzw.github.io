@@ -68,11 +68,6 @@
       document.getElementById('date').textContent = `${dayName}, ${day} ${months[now.getMonth()]}`;
       document.getElementById('year').textContent = year;
 
-      if ((day === 12 && month === 8) || (day === 30 && month === 9) || (day === 1 && month === 1)) {
-        startConfetti();
-        document.getElementById('button').style.display = 'block';
-      }
-
       if (day === 14 && month === 2) {
         const video = document.getElementById('video-background');
         video.style.display = 'block';
@@ -92,6 +87,15 @@
       updateCountdown();
     }
 
+    function hideConfettiButton() {
+      const now = new Date();
+      const day = now.getDate();
+      const month = now.getMonth() + 1;
+
+      document.getElementById('confetti').style.display = 
+        ((day === 30 && month === 9) || (day === 12 && month === 8)) ? 'block' : 'none';  
+    }
+
     function startConfetti() {
       confetti({
         particleCount: 100,
@@ -103,8 +107,6 @@
     function hideButton() {
       const now = new Date();
       document.getElementById('button').style.display =
-        now.getDate() === 30 && month === 9 ? 'block' : 'none';
-      document.getElementById('confetti').style.display =
         now.getDate() === 30 && month === 9 ? 'block' : 'none';
     }
 
@@ -132,6 +134,7 @@
     window.onload = function () {
       updateClock();
       hideButton();
+      hideConfettiButton();
     };
   </script>
 </body>
