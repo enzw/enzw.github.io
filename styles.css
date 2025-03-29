@@ -132,6 +132,7 @@
     object-fit: cover;
     z-index: 0;
     opacity: 10%;
+    display: none;
   }
 
 .confetti{
@@ -141,4 +142,5 @@
   left: 93%;
   top: 83%;
   text-decoration: none;
+  display: none;
 }
