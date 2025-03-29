@@ -54,7 +54,8 @@
     } else if (month === 9 || month === 10 || month === 11) {
         randomJawa = jawa[2];
     }  else if (jam >= 18 || jam <= 4){
-      randomJawa = jawa[3];
+        randomJawa = jawa[3];
+        flower.style.textShadow = "0px 0px 15px white";
     } else {
       randomJawa = jawa[4];
     }
@@ -65,7 +66,7 @@
     let randomX = Math.random() * window.innerWidth;
     flower.style.left = `${randomX}px`;
 
-    let randomSize = Math.random() * 20 + 4;
+    let randomSize = Math.random() * 20 + 20;
     flower.style.fontSize = `${randomSize}px`;
 
     let randomSpeed = Math.random() * 20 + 2;
