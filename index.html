@@ -38,44 +38,42 @@
   <script>
 
     function createFlower() {
-    let flower = document.createElement("div");
+      let flower = document.createElement("div");
 
-    let jawa = ['❄︎', '🌸', '🍁', ''];
-    let now = new Date();
-    let jam = String(now.getHours()).padStart(2, '0');
-    let month = now.getMonth() + 1;
-    let day = now.getDate();
-    let jawaPIlihan;
+      let jawa = ['❄︎', '🌸', '🍁', ''];
+      let now = new Date();
+      let jam = String(now.getHours()).padStart(2, '0');
+      let month = now.getMonth() + 1;
+      let day = now.getDate();
+      let jawaPIlihan;
 
-    if (month === 12 || month === 1 || month === 2) {
-        jawaPIlihan = jawa[0];
-        flower.style.textShadow = "0px 0px 15px white";
-    } else if (day === 14 && month === 2) {
-        jawaPIlihan = jawa[1];
-        flower.style.textShadow = "0px 0px 15px #FE6DC5";
-    } else if (month === 9 || month === 10 || month === 11) {
-        jawaPIlihan = jawa[2];
-    } else {
-      jawaPIlihan = jawa[3];
+      if (month === 12 || month === 1 || month === 2) {
+          jawaPIlihan = jawa[0];
+          flower.style.textShadow = "0px 0px 15px white";
+      } else if (day === 14 && month === 2) {
+          jawaPIlihan = jawa[1];
+          flower.style.textShadow = "0px 0px 15px #FE6DC5";
+      } else if (month === 9 || month === 10 || month === 11) {
+          jawaPIlihan = jawa[2];
+      } else {
+        jawaPIlihan = jawa[3];
+      }
+
+      flower.innerHTML = jawaPIlihan;
+      flower.classList.add("flower");
+
+      let randomX = Math.random() * window.innerWidth;
+      flower.style.left = `${randomX}px`;
+
+      let randomSize = Math.random() * 20 + 10;
+      flower.style.fontSize = `${randomSize}px`;
+
+      let randomSpeed = Math.random() * 20 + 2;
+      flower.style.animation = `fall ${randomSpeed}s linear infinite`;
+
+      document.body.appendChild(flower);
+      setTimeout(() => flower.remove(), randomSpeed * 1000);
     }
-
-    flower.innerHTML = jawaPIlihan;
-    flower.classList.add("flower");
-
-    let randomX = Math.random() * window.innerWidth;
-    flower.style.left = `${randomX}px`;
-
-    let randomSize = Math.random() * 20 + 10;
-    flower.style.fontSize = `${randomSize}px`;
-
-    let randomSpeed = Math.random() * 20 + 2;
-    flower.style.animation = `fall ${randomSpeed}s linear infinite`;
-
-    document.body.appendChild(flower);
-    setTimeout(() => flower.remove(), randomSpeed * 1000);
-}
-
-
 
     function updateClock() {
       const now = new Date();
