@@ -33,9 +33,31 @@
 
     <a href="#" class="confetti" id="confetti">🎉</a>
 
+    <div class="earth" id="earth"></div>
+
+    <div class="moon" id="moon">
+      <div class="shadow"></div>
   </div>
 
   <script>
+    let bumiDiDepan = true;
+    function zIndexs(){
+      let bumi = document.getElementById("earth");
+      bumiDiDepan = !bumiDiDepan;
+      bumi.style.zIndex = bumiDiDepan ? '-3' : '10';
+    }
+
+    function manuc(){
+      let now = new Date();
+      let jam = now.getHours();
+      let day = now.getDate();
+      let month = now.getMonth() + 1;
+
+      if ((jam >= 18 || jam <= 4) && !(day === 30 && month === 9) && !(day === 14 && month === 2)) {
+        document.getElementById("moon").style.display = 'block';
+        document.getElementById("earth").style.display = 'block';
+      }
+    }
 
     function createFlower() {
       let flower = document.createElement("div");
@@ -149,12 +171,14 @@
     document.getElementById('confetti').addEventListener('click', startConfetti);
 
     setInterval(updateClock, 1000);
+    setInterval(zIndexs, 60000);
 
     window.onload = function () {
       updateClock();
       hideButton();
       hideConfettiButton();
       hideVideo();
+      manuc();
     };
   </script>
 </body>

@@ -34,6 +34,8 @@
   #clock {
     font-size: 6em;
     font-weight: bold;
+    filter: grayscale(100%);
+    mix-blend-mode: exclusion;
   }
 
   #date {
@@ -41,12 +43,14 @@
     font-size: 1.2em;
     font-weight: 300;
     opacity: 0.7;
+    mix-blend-mode: difference;
   }
 
   #countdown {
     color: gray;
     font-size: 0.9em;
     opacity: 0.5;
+    mix-blend-mode: difference;
   }
   
   iframe {
@@ -93,6 +97,7 @@
     height: 100%;
     display: flex;
     justify-content: center;
+    mix-blend-mode: difference;
   }
 
   .flower {
@@ -102,6 +107,51 @@
   top: 0;
   text-shadow: 0 0 10px #FE6DC5;
   -ms-flex-item-align: center;
+}
+
+.earth {
+  z-index: -3;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, #2a8cdb 65%, #34a853 35%);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 20px lightblue;
+  animation : eclipse 60s infinite alternate-reverse;
+  filter: blur(10px);
+  display: none;
+}
+
+.moon {
+  display: none;
+  width: 1000px;
+  height: 1000px;
+  background: radial-gradient(circle, white 40%, #efff96 70%);
+  border-radius: 50%;
+  position: absolute;
+  z-index: -2;
+  box-shadow: 0 0 100px rgba(255, 255, 255, 0.5);
+}
+.shadow {
+  position: absolute;
+  width: 1000px;
+  height: 1000px;
+  background: #121212;
+  border-radius: 50%;
+  animation: eclipse 64s infinite;
+}
+@keyframes eclipse {
+  0% {
+      transform: translateX(-1500px);
+      filter: blur(0px);
+  }
+  100% {
+      transform: translateX(1500px);
+      filter: blur(30px);
+  }
 }
 
 @keyframes fall {
