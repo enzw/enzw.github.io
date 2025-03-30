@@ -85,7 +85,7 @@
   #year{
     font-size: 29em;
     font-weight: bold;
-    opacity: 1%;
+    opacity: 5%;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     z-index: -1;
