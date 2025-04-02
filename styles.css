@@ -4,8 +4,7 @@
     box-sizing: border-box;
   }
 
-  html, body {\
-      /
+  html, body {
     font-family: 'Poppins', sans-serif;
     color: white;
     height: 100vh;
