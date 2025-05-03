@@ -1,16 +1,9 @@
-const btn1 = document.getElementById('btn1');
-
-btn1.addEventListener('click', () => {
-  btn1.classList.toggle('active');
-});
-
-const buttons = document.querySelectorAll('.btn');
-
-buttons.forEach(button => {
-  button.addEventListener('click', () => {
-    // Hapus kelas "active" dari semua tombol
-    buttons.forEach(btn => btn.classList.remove('active'));
-    // Tambahkan kelas "active" ke tombol yang diklik
-    button.classList.add('active');
-  });
-});
+navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                // Menghubungkan stream video ke elemen video
+                const videoElement = document.getElementById('videoElement');
+                videoElement.srcObject = stream;
+            })
+            .catch(function(error) {
+                console.error("Error accessing the camera: ", error);
+            });

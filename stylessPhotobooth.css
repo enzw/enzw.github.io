@@ -211,6 +211,14 @@ body {
     background: url(<path-to-image>) lightgray 50% / cover no-repeat;
 }
 
+#videoElement{
+    width: 778px;
+    height: 778px;
+    object-fit: cover;
+    transform: scaleX(-1);
+    border-radius: 24px;
+}
+
 #buttons {
     display: flex;
     width: 565px;
