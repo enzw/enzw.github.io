@@ -24,7 +24,7 @@ body {
     display: flex;
     width: 1386px;
     align-items: center;
-    gap: 40px;
+    gap: 64px;
 }
 
 #themes {
@@ -206,6 +206,9 @@ body {
     width: 778px;
     height: 778px;
     flex-shrink: 0; 
+    border-radius: 48px;
+    border: 20px solid #D9D9D9;
+    background: url(<path-to-image>) lightgray 50% / cover no-repeat;
 }
 
 #buttons {
@@ -216,4 +219,19 @@ body {
     align-items: center;
     gap: 58px;
     flex-shrink: 0;
+}
+
+#photos{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+}
+
+.photo {
+    width: 261px;
+    height: 306px;
+    border-radius: 32px;
+    background: #D9D9D9;
 }
