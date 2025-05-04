@@ -2,9 +2,10 @@
 @import "tailwindcss";
 
 html{
-    transform: scale(0.5);
+    transform: scale(0.55);
     width: 100%;
     transform-origin: top;
+    height: 100%;
 }
 
 body {
@@ -16,15 +17,17 @@ body {
     justify-content: center;
     align-items: center;
     gap: 64px;
-    background: #F1EFEC;
     overflow: hidden;
+    background-color: #f8abab;
 }
 
 #container {
     display: flex;
-    width: 1386px;
     align-items: center;
     gap: 64px;
+    background: #F1EFEC;
+    padding: 64px;
+    border-radius: 86px;
 }
 
 #themes {
