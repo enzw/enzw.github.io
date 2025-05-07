@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+@import "tailwindcss";
+
+#photocard {
+    display: flex;
+    width: 1148px;
+    padding: 180px 120px 240px 120px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 60px;
+}
+
