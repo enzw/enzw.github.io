@@ -28,6 +28,7 @@ body {
     background: #F1EFEC;
     padding: 64px;
     border-radius: 86px;
+    box-shadow: 0px 24px 0px #D9D9D9;
 }
 
 #themes {
@@ -211,7 +212,7 @@ body {
     flex-shrink: 0; 
     border-radius: 48px;
     border: 20px solid #D9D9D9;
-    background: url(<path-to-image>) lightgray 50% / cover no-repeat;
+    background: lightgray 50% / cover no-repeat;
 }
 
 #videoElement{
@@ -230,6 +231,7 @@ body {
     align-items: center;
     gap: 58px;
     flex-shrink: 0;
+    padding-top: 32px;
 }
 
 #photos{
