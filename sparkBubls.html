@@ -15,23 +15,20 @@
     <!-- themes selection -->
 
     <div id="themes">
-      <p id="text">Themes</p>
-        <button class="btn textbtn" id="btn1" data="Click me"><span>🌸🍥🩷🎂</span></button>
-        <button class="btn textbtn" id="btn2" data="Click me"><span>💧🧊🐬🦋</span></button>
-        <button class="btn textbtn" id="btn3" data="Click me"><span>🧁🎀🦄💜</span></button>
-        <button class="btn textbtn" id="btn4" data="Click me"><span>🌱🥝🐢🧼</span></button>
+      <p class="text" id="text">Themes</p>
+        <button class="btn text" id="btn1" data="Click me"><span>🌸🍥🩷🎂</span></button>
+        <button class="btn text" id="btn2" data="Click me"><span>💧🧊🐬🦋</span></button>
+        <button class="btn text" id="btn3" data="Click me"><span>🧁🎀🦄💜</span></button>
+        <button class="btn text" id="btn4" data="Click me"><span>🌱🥝🐢🧼</span></button>
     </div>
 
     <!-- main feature -->
 
     <div class="shooter">
       <div id="camera">
-        <canvas id="canvas" style="display: none;">
-        
-        </canvas>
-        <div id="countdown"></div>
+        <p class="text" id="countdown"></p>
         <video id="videoElement" autoplay></video>
-        
+        <canvas id="canvas" style="display: none;"></canvas>
       </div>
       <div id="buttons">
         <a class="mainButton" id="reset" href="#"><img src="images/Button.png" alt=""></a>
@@ -43,7 +40,7 @@
     <!-- photo list -->
 
     <div id="photos">
-      <p id="text">Photos</p>
+      <p class="text">Photos</p>
       <div class="photo" id="photo1"></div>
       <div class="photo" id="photo2"></div>
       <div class="photo" id="photo3"></div>
