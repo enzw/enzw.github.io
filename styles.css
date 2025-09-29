@@ -183,7 +183,7 @@
     object-fit: cover;
     z-index: 0;
     opacity: 10%;
-    display: none;
+    display: blpck;
   }
 
 .confetti{
