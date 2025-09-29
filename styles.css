@@ -61,7 +61,7 @@
   }
 
   .button {
-    display: none;
+    display: block;
     padding: 10px 20px;
     font-size: 1.2em;
     font-weight: bold;
@@ -193,7 +193,7 @@
   left: 93%;
   top: 83%;
   text-decoration: none;
-  display: none;
+  display: block;
 }
 
 #camera{
