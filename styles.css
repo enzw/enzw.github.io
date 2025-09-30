@@ -61,7 +61,7 @@
   }
 
   .button {
-    display: block;
+    display: none;
     padding: 10px 20px;
     font-size: 1.2em;
     font-weight: bold;
@@ -183,7 +183,7 @@
     object-fit: cover;
     z-index: 0;
     opacity: 10%;
-    display: blpck;
+    display: none;
   }
 
 .confetti{
@@ -193,7 +193,7 @@
   left: 93%;
   top: 83%;
   text-decoration: none;
-  display: block;
+  display: none;
 }
 
 #camera{
