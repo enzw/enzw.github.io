@@ -14,22 +14,5 @@
         <img class="" id="photo3" src="" alt="">
         <p id="date"></p>
     </div>
-    
-    
-  <script>
-  document.addEventListener("DOMContentLoaded",()=>{
-    const saved = JSON.parse(localStorage.getItem("photobooth_photos")||"{}");
-
-    ["photo1","photo2","photo3"].forEach(id=>{
-      const img=document.getElementById(id);
-      if(saved[id]) img.src=saved[id];
-    });
-
-    const dateEl=document.getElementById("date");
-    dateEl.textContent=new Date().toLocaleDateString("id-ID",{
-      day:"2-digit",month:"long",year:"numeric"
-    });
-  });
-  </script>
 </body>
 </html>
