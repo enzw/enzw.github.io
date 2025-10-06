@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeColor = "#"
   localStorage.setItem("themeColor", themeColor);
 
-  const themeSticker = "#"
+  const themeSticker = ""
   localStorage.setItem("themeSticker", themeSticker);
 
   Object.entries(themes).forEach(([id, {color, sticker}]) => {
