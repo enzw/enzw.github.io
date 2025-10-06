@@ -6,35 +6,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PhotoCard</title>
   <link rel="stylesheet" href="stylesPhotoCard.css">
-  <script src="scriptPhotobooth.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 </head>
 
-<body>
+<body class="d-flex justify-content-center align-items-center">
   <div id="photocard">
-    <img class="" id="photo1" src="" alt="">
-    <img class="" id="photo2" src="" alt="">
-    <img class="" id="photo3" src="" alt="">
-    <p id="date"></p>
+    <img class="photopart" id="photo1" src="" alt="">
+    <img class="photopart" id="photo2" src="" alt="">
+    <img class="photopart" id="photo3" src="" alt="">
+    <img class="sticker" src="images/sticker4.png" style="position: absolute; top: -0%; left: 7%">
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      const photoCard = document.getElementById("photocard");
       const saved = JSON.parse(localStorage.getItem("photobooth_photos") || "{}");
+      const colorTheme = localStorage.getItem("themeColor");
 
       ["photo1", "photo2", "photo3"].forEach(id => {
         const img = document.getElementById(id);
         if (saved[id]) img.src = saved[id];
       });
 
-      const dateEl = document.getElementById("date");
-      dateEl.textContent = new Date().toLocaleDateString("id-ID", {
-        day: "2-digit", month: "long", year: "numeric"
-      });
+      if (colorTheme) {
+        photoCard.style.backgroundColor = colorTheme;
+      }
+      
     });
   </script>
-
+  <script src="scriptPhotobooth.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
     crossorigin="anonymous"></script>

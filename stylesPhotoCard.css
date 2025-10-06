@@ -4,9 +4,17 @@
 #photocard {
     display: flex;
     width: 1148px;
+    height: 3249px;
     padding: 180px 120px 240px 120px;
     flex-direction: column;
     align-items: flex-start;
     gap: 60px;
+}
+
+.photopart{
+    width: 908px; 
+    height: 903px;
+    object-fit: cover;
+    border-radius: 32px;
 }
 
