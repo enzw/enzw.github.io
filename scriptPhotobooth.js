@@ -13,18 +13,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const theme4 = document.getElementById("btn4");
 
   const themes = {
-    btn1: "#FFC3C3",
-    btn2: "#9FF9FF",
-    btn3: "#F6B8FF",
-    btn4: "#AEFFC6"
+    btn1: {
+      color: "#FFC3C3",
+      sticker: "images/sticker4.png"
+    },
+    btn2: {
+      color: "#9FF9FF",
+      sticker: "images/sticker3.png"
+    },
+    btn3: {
+      color: "#F6B8FF",
+      sticker: "images/sticker2.png"
+    },
+    btn4: {
+      color: "#AEFFC6",
+      sticker: "images/sticker1.png"
+    }
   };
-
-  const sticker = {
-   btn1: "images/sticker4.png",
-   btn2: "images/sticker3.png",
-   btn3: "images/sticker2.png",
-   btn4: "images/sticker1.png"
-  }
 
   const photoEls = [
     document.getElementById("photo1"),
@@ -92,13 +97,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeColor = "#"
   localStorage.setItem("themeColor", themeColor);
 
-  Object.entries(themes).forEach(([id, color]) => {
+  const themeSticker = "#"
+  localStorage.setItem("themeSticker", themeSticker);
+
+  Object.entries(themes).forEach(([id, {color, sticker}]) => {
     document.getElementById(id).addEventListener("click", e => {
       e.preventDefault();
       localStorage.setItem("themeColor", color);
+      localStorage.setItem("themeSticker", sticker);
     });
   });
-
-  
 
 });

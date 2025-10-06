@@ -15,24 +15,26 @@
     <img class="photopart" id="photo1" src="" alt="">
     <img class="photopart" id="photo2" src="" alt="">
     <img class="photopart" id="photo3" src="" alt="">
-    <img class="sticker" src="images/sticker4.png" style="position: absolute; top: -0%; left: 7%">
+    <img class="sticker" id="sticker" style="position: absolute; top: -0%; left: 7%">
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      const sticker = document.getElementById("sticker");
       const photoCard = document.getElementById("photocard");
       const saved = JSON.parse(localStorage.getItem("photobooth_photos") || "{}");
       const colorTheme = localStorage.getItem("themeColor");
+      const stickerTheme = localStorage.getItem("themeSticker");
 
       ["photo1", "photo2", "photo3"].forEach(id => {
         const img = document.getElementById(id);
         if (saved[id]) img.src = saved[id];
       });
 
-      if (colorTheme) {
-        photoCard.style.backgroundColor = colorTheme;
-      }
+      if (colorTheme) photoCard.style.backgroundColor = colorTheme;
       
+      if (stickerTheme) sticker.src = stickerTheme;
+
     });
   </script>
   <script src="scriptPhotobooth.js"></script>
