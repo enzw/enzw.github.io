@@ -7,10 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const snapBtn = document.getElementById("snap");
   const resetBtn = document.getElementById("reset");
   const saveBtn = document.getElementById("save");
-  const theme1 = document.getElementById("btn1");
-  const theme2 = document.getElementById("btn2");
-  const theme3 = document.getElementById("btn3");
-  const theme4 = document.getElementById("btn4");
 
   const themes = {
     btn1: {
