@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Download your image!</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🐨</text></svg>" />
+  <link rel="stylesheet" href="stylessPhotobooth.css" />
+  <script defer src="scriptPhotobooth.js"></script>
+</head>
+<body>
+  <div id="container">
+    
+    <!-- Themes -->
+    <section id="themes">
+      <p class="text">Themes</p>
+      <button class="btn text" id="btn1"><span>🌸🍥🩷🎂</span></button>
+      <button class="btn text" id="btn2"><span>💧🧊🐬🦋</span></button>
+      <button class="btn text" id="btn3"><span>🧁🎀🦄💜</span></button>
+      <button class="btn text" id="btn4"><span>🌱🥝🐢🧼</span></button>
+    </section>
+
+    <!-- Camera and buttons -->
+    <section class="shooter">
+      <div id="camera">
+        <p class="text" id="countdown"></p>
+        <video id="videoElement" autoplay></video>
+        <canvas id="canvas" style="display: none;"></canvas>
+      </div>
+
+      <div id="buttons">
+        <a class="mainButton" id="reset" href="#"><img src="images/Button.png" alt="Reset" /></a>
+        <a class="mainButton" id="snap" href="#"><img src="images/Button-1.png" alt="Snap" /></a>
+        <a class="mainButton" id="save" href="photoCard.html"><img src="images/Button-3.png" alt="Save" /></a>
+      </div>
+    </section>
+
+    <!-- Photo result -->
+    <section id="photos">
+      <p class="text">Photos</p>
+      <div class="photo" id="photo1"></div>
+      <div class="photo" id="photo2"></div>
+      <div class="photo" id="photo3"></div>
+    </section>
+
+  </div>
+</body>
+</html>

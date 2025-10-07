@@ -66,10 +66,9 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.height = video.videoHeight;
 
     ctx.save();
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     ctx.restore();
+
 
     const dataURL = canvas.toDataURL("image/png");
     photoEls[idx].style.backgroundImage = `url(${dataURL})`;
@@ -100,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeSticker = ""
   localStorage.setItem("themeSticker", themeSticker);
 
-  Object.entries(themes).forEach(([id, {color, sticker}]) => {
+  Object.entries(themes).forEach(([id, { color, sticker }]) => {
     document.getElementById(id).addEventListener("click", e => {
       e.preventDefault();
       localStorage.setItem("themeColor", color);
