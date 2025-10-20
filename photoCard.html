@@ -11,6 +11,8 @@
 </head>
 
 <body class="d-flex justify-content-center align-items-center">
+  <div id="waiting"></div>
+
   <div id="photocard">
     <img class="photopart" id="photo1" src="" alt="">
     <img class="photopart" id="photo2" src="" alt="">
@@ -25,6 +27,7 @@
       const saved = JSON.parse(localStorage.getItem("photobooth_photos") || "{}");
       const colorTheme = localStorage.getItem("themeColor");
       const stickerTheme = localStorage.getItem("themeSticker");
+      const countdown = document.getElementById("waiting").innerHTML;
 
       ["photo1", "photo2", "photo3"].forEach(id => {
         const img = document.getElementById(id);
@@ -34,6 +37,10 @@
       if (colorTheme) photoCard.style.backgroundColor = colorTheme;
 
       if (stickerTheme) sticker.src = stickerTheme;
+
+      const tunggu = (x) => {
+        
+      }
 
     });
   </script>
