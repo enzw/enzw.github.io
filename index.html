@@ -79,13 +79,13 @@
         let day = now.getDate();
         let jawaPIlihan;
 
-        if (month === 12 || month === 1 || month === 2) {
+        if (month === 11 || month === 12 || month === 1 || month === 2) {
           jawaPIlihan = jawa[0];
           flower.style.textShadow = "0px 0px 15px white";
         } else if (day === 14 && month === 2 || day === 30 && month === 9) {
           jawaPIlihan = jawa[1];
           flower.style.textShadow = "0px 0px 15px #FE6DC5";
-        } else if (month === 9 || month === 10 || month === 11) {
+        } else if (month === 9 || month === 10) {
           jawaPIlihan = jawa[0];
         } else {
           jawaPIlihan = jawa[3];
@@ -163,7 +163,7 @@
       function hideButton() {
         const now = new Date();
         document.getElementById('button').style.display =
-          now.getDate() === 30 && month === 9 ? 'block' : 'none';
+          now.getDate() === 28 && month === 11 ? 'block' : 'none';
       }
 
       function updateCountdown() {
