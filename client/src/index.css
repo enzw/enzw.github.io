@@ -13,8 +13,8 @@
     --card-foreground: oklch(0.145 0.008 326);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0.008 326);
-    --primary: oklch(0.496 0.265 301.924);
-    --primary-foreground: oklch(0.977 0.014 308.299);
+    --primary: oklch(0.54 0.14 161);
+    --primary-foreground: oklch(0.99 0.004 160);
     --secondary: oklch(0.967 0.001 286.375);
     --secondary-foreground: oklch(0.21 0.006 285.885);
     --muted: oklch(0.96 0.003 325.6);
@@ -25,15 +25,15 @@
     --border: oklch(0.922 0.005 325.62);
     --input: oklch(0.922 0.005 325.62);
     --ring: oklch(0.711 0.019 323.02);
-    --chart-1: oklch(0.897 0.196 126.665);
-    --chart-2: oklch(0.768 0.233 130.85);
-    --chart-3: oklch(0.648 0.2 131.684);
-    --chart-4: oklch(0.532 0.157 131.589);
-    --chart-5: oklch(0.453 0.124 130.933);
-    --radius: 0.625rem;
+    --chart-1: oklch(0.63 0.17 157);
+    --chart-2: oklch(0.7 0.14 210);
+    --chart-3: oklch(0.72 0.15 76);
+    --chart-4: oklch(0.65 0.18 25);
+    --chart-5: oklch(0.64 0.17 320);
+    --radius: 0.75rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0.008 326);
-    --sidebar-primary: oklch(0.558 0.288 302.321);
+    --sidebar-primary: oklch(0.54 0.14 161);
     --sidebar-primary-foreground: oklch(0.977 0.014 308.299);
     --sidebar-accent: oklch(0.96 0.003 325.6);
     --sidebar-accent-foreground: oklch(0.212 0.019 322.12);
@@ -123,7 +123,7 @@
     @apply border-border outline-ring/50;
     }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-muted/30 text-foreground antialiased;
     }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;
@@ -131,4 +131,10 @@
   html {
     @apply font-sans;
     }
+}
+
+@layer utilities {
+  .page-container { @apply mx-auto w-full max-w-[1440px] px-4 py-5 pb-28 sm:px-6 lg:px-8 lg:py-8 lg:pb-8; }
+  .page-title { @apply font-heading text-2xl font-semibold tracking-tight sm:text-3xl; }
+  .finance-number { @apply tabular-nums tracking-tight; }
 }
