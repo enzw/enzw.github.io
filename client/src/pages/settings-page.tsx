@@ -1,15 +1,26 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Camera, Check, Loader2, LogOut, Palette, UserRound } from "lucide-react"
+import {
+  Camera,
+  Check,
+  Loader2,
+  LogOut,
+  Palette,
+  Plus,
+  Tags,
+  UserRound,
+} from "lucide-react"
 import { toast } from "sonner"
 
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button"
 import { PageHeader } from "@/components/page-header"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -19,6 +30,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -31,8 +43,18 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/features/auth/auth-context"
+import { useFinanceData } from "@/hooks/use-finance-data"
 import { zodResolver } from "@/lib/form-resolver"
+import { labels } from "@/lib/format"
 import {
   FEMALE_AVATARS,
   isMaleAvatar,
@@ -40,13 +62,34 @@ import {
   type AvatarEmoji,
 } from "@/lib/profile"
 import { api, errorMessage } from "@/services/api"
-import type { User } from "@/types/finance"
+import type { Category, ExpenseType, User } from "@/types/finance"
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nama minimal 2 karakter").max(60),
 })
 
 type Values = z.infer<typeof schema>
+
+const categorySchema = z.object({
+  name: z.string().trim().min(2, "Nama minimal 2 karakter").max(40),
+  expenseType: z.enum([
+    "FIXED",
+    "VARIABLE",
+    "SUBSCRIPTION",
+    "DEBT",
+    "DISCRETIONARY",
+  ]),
+})
+
+type CategoryValues = z.infer<typeof categorySchema>
+
+const expenseTypes: ExpenseType[] = [
+  "FIXED",
+  "VARIABLE",
+  "SUBSCRIPTION",
+  "DEBT",
+  "DISCRETIONARY",
+]
 
 function AvatarGroup({
   label,
@@ -97,6 +140,97 @@ function AvatarGroup({
   )
 }
 
+function CategoryDialog({ onSaved }: { onSaved: () => void }) {
+  const [open, setOpen] = useState(false)
+  const form = useForm<CategoryValues>({
+    resolver: zodResolver(categorySchema),
+    defaultValues: { name: "", expenseType: "VARIABLE" },
+  })
+  const expenseType = form.watch("expenseType")
+
+  const submit = async (values: CategoryValues) => {
+    try {
+      await api.post("/categories", values)
+      toast.success("Kategori ditambahkan")
+      form.reset()
+      setOpen(false)
+      onSaved()
+    } catch (cause) {
+      toast.error("Gagal menambahkan kategori", {
+        description: errorMessage(cause),
+      })
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button size="sm" />}>
+        <Plus />
+        Tambah kategori
+      </DialogTrigger>
+      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-h-[90dvh]">
+        <DialogHeader className="shrink-0 border-b px-6 py-5 pr-16">
+          <DialogTitle>Kategori pengeluaran baru</DialogTitle>
+          <DialogDescription>
+            Buat kategori agar pencatatan dan budget lebih sesuai kebutuhanmu.
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          id="category-form"
+          className="min-h-0 flex-1 overflow-y-auto px-6 py-5"
+          onSubmit={form.handleSubmit(submit)}
+        >
+          <FieldGroup className="gap-4">
+            <Field data-invalid={Boolean(form.formState.errors.name)}>
+              <FieldLabel htmlFor="category-name">Nama kategori</FieldLabel>
+              <Input
+                id="category-name"
+                placeholder="Contoh: Kesehatan"
+                aria-invalid={Boolean(form.formState.errors.name)}
+                {...form.register("name")}
+              />
+              <FieldError errors={[form.formState.errors.name]} />
+            </Field>
+            <Field>
+              <FieldLabel>Klasifikasi pengeluaran</FieldLabel>
+              <Select
+                value={expenseType}
+                onValueChange={(value) =>
+                  form.setValue("expenseType", value as ExpenseType)
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue>{labels[expenseType]}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {expenseTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {labels[type]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          </FieldGroup>
+        </form>
+        <DialogFooter
+          showCloseButton
+          className="sticky bottom-0 z-10 shrink-0 border-t bg-popover px-6 py-4"
+        >
+          <Button
+            type="submit"
+            form="category-form"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting && <Loader2 className="animate-spin" />}
+            Simpan kategori
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function SettingsPage() {
   const { user, setUser, logout } = useAuth()
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -104,6 +238,7 @@ export function SettingsPage() {
   const [avatarEmoji, setAvatarEmoji] = useState<AvatarEmoji | null>(
     user?.avatarEmoji ?? null,
   )
+  const categories = useFinanceData<Category>("/categories", "categories")
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: { name: user?.name ?? "" },
@@ -147,6 +282,18 @@ export function SettingsPage() {
     } catch (cause) {
       toast.error("Gagal keluar", { description: errorMessage(cause) })
       setLoggingOut(false)
+    }
+  }
+
+  const removeCategory = async (category: Category) => {
+    try {
+      await api.delete(`/categories/${category.id}`)
+      toast.success(`Kategori ${category.name} dihapus`)
+      await categories.refresh()
+    } catch (cause) {
+      toast.error("Kategori tidak dapat dihapus", {
+        description: errorMessage(cause),
+      })
     }
   }
 
@@ -302,6 +449,68 @@ export function SettingsPage() {
           </Card>
         </div>
       </div>
+      <Card className="mt-4">
+        <CardHeader>
+          <div className="mb-2 grid size-10 place-items-center rounded-2xl bg-primary/10 text-primary">
+            <Tags className="size-5" />
+          </div>
+          <CardTitle>Kategori pengeluaran</CardTitle>
+          <CardDescription>
+            Atur kategori yang tersedia saat mencatat transaksi dan membuat
+            budget.
+          </CardDescription>
+          <CardAction>
+            <CategoryDialog onSaved={() => void categories.refresh()} />
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          {categories.loading ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {Array.from({ length: 4 }, (_, index) => (
+                <Skeleton key={index} className="h-14" />
+              ))}
+            </div>
+          ) : categories.error ? (
+            <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {categories.error}
+            </p>
+          ) : !categories.data.length ? (
+            <div className="rounded-2xl border border-dashed p-6 text-center">
+              <p className="font-medium">Belum ada kategori pengeluaran</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Tambahkan kategori pertama agar transaksi lebih mudah dikelompokkan.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {categories.data.map((category) => (
+                <div
+                  key={category.id}
+                  className="flex min-w-0 items-center gap-3 rounded-2xl bg-muted/50 px-4 py-3"
+                >
+                  <span
+                    className="size-3 shrink-0 rounded-full"
+                    style={{ backgroundColor: category.color ?? "currentColor" }}
+                    aria-hidden="true"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">{category.name}</p>
+                    <Badge variant="secondary" className="mt-1">
+                      {labels[category.expenseType]}
+                    </Badge>
+                  </div>
+                  <ConfirmDeleteButton
+                    label={`Hapus kategori ${category.name}`}
+                    title={`Hapus kategori ${category.name}?`}
+                    description="Kategori tidak akan muncul untuk transaksi baru. Riwayat transaksi dan budget lama tetap aman."
+                    onConfirm={() => removeCategory(category)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

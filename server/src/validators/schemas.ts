@@ -27,6 +27,17 @@ export const walletSchema = z.object({
   openingBalance: z.coerce.number().min(0).default(0),
 })
 
+export const categorySchema = z.object({
+  name: z.string().trim().min(2, "Nama minimal 2 karakter").max(40),
+  expenseType: z.enum([
+    "FIXED",
+    "VARIABLE",
+    "SUBSCRIPTION",
+    "DEBT",
+    "DISCRETIONARY",
+  ]),
+})
+
 export const transactionSchema = z.object({
   walletId: z.string().uuid(),
   categoryId: optionalId,

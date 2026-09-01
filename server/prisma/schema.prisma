@@ -71,6 +71,7 @@ model Category {
   name         String
   expenseType  ExpenseType
   color        String?
+  isActive     Boolean       @default(true)
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
   budgets      Budget[]
