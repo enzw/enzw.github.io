@@ -84,14 +84,18 @@ function WalletDialog({ onSaved }: { onSaved: () => void }) {
         <Plus />
         Tambah wallet
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-h-[90dvh]">
+        <DialogHeader className="shrink-0 border-b px-6 py-5 pr-16">
           <DialogTitle>Tambah wallet</DialogTitle>
           <DialogDescription>
             Wallet adalah catatan virtual dan tidak terhubung langsung ke bank.
           </DialogDescription>
         </DialogHeader>
-        <form id="wallet-form" onSubmit={form.handleSubmit(submit)}>
+        <form
+          id="wallet-form"
+          className="min-h-0 flex-1 overflow-y-auto px-6 py-5"
+          onSubmit={form.handleSubmit(submit)}
+        >
           <FieldGroup className="gap-4">
             <Field data-invalid={Boolean(form.formState.errors.name)}>
               <FieldLabel htmlFor="wallet-name">Nama</FieldLabel>
@@ -148,7 +152,10 @@ function WalletDialog({ onSaved }: { onSaved: () => void }) {
             </Field>
           </FieldGroup>
         </form>
-        <DialogFooter showCloseButton>
+        <DialogFooter
+          showCloseButton
+          className="sticky bottom-0 z-10 shrink-0 border-t bg-popover px-6 py-4"
+        >
           <Button
             form="wallet-form"
             type="submit"

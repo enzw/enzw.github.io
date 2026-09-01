@@ -136,14 +136,18 @@ function GoalDialog({ onSaved }: { onSaved: () => void }) {
         <Plus />
         Buat tujuan
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-h-[90dvh]">
+        <DialogHeader className="shrink-0 border-b px-6 py-5 pr-16">
           <DialogTitle>Tujuan tabungan baru</DialogTitle>
           <DialogDescription>
             Tentukan target total dan tanggalnya. Rencana setoran akan dihitung otomatis.
           </DialogDescription>
         </DialogHeader>
-        <form id="goal-form" onSubmit={form.handleSubmit(submit)}>
+        <form
+          id="goal-form"
+          className="min-h-0 flex-1 overflow-y-auto px-6 py-5"
+          onSubmit={form.handleSubmit(submit)}
+        >
           <FieldGroup className="grid gap-4 sm:grid-cols-2">
             <Field
               className="sm:col-span-2"
@@ -229,7 +233,10 @@ function GoalDialog({ onSaved }: { onSaved: () => void }) {
             </Field>
           </FieldGroup>
         </form>
-        <DialogFooter showCloseButton>
+        <DialogFooter
+          showCloseButton
+          className="sticky bottom-0 z-10 shrink-0 border-t bg-popover px-6 py-4"
+        >
           <Button
             form="goal-form"
             type="submit"
