@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 import { Loader2, Plus } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { CurrencyInput } from "@/components/forms/currency-input"
+import { DatePicker } from "@/components/forms/date-picker"
 import {
   Dialog,
   DialogContent,
@@ -161,7 +163,7 @@ export function TransactionDialog({
                 }
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue />
+                  <SelectValue>{labels[type]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {(["INCOME", "EXPENSE", "SAVING"] as const).map(
@@ -176,14 +178,21 @@ export function TransactionDialog({
             </Field>
             <Field data-invalid={Boolean(form.formState.errors.amount)}>
               <FieldLabel htmlFor="amount">Nominal</FieldLabel>
-              <Input
-                id="amount"
-                type="number"
-                min="1"
-                inputMode="numeric"
-                placeholder="0"
-                aria-invalid={Boolean(form.formState.errors.amount)}
-                {...form.register("amount")}
+              <Controller
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <CurrencyInput
+                    id="amount"
+                    name={field.name}
+                    ref={field.ref}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="0"
+                    aria-invalid={Boolean(form.formState.errors.amount)}
+                  />
+                )}
               />
               <FieldError errors={[form.formState.errors.amount]} />
             </Field>
@@ -197,7 +206,9 @@ export function TransactionDialog({
                   }
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue>
+                      {labels[incomeType ?? "PRIMARY"]}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {(["PRIMARY", "SECONDARY"] as const).map((value) => (
@@ -221,7 +232,9 @@ export function TransactionDialog({
                     }}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue />
+                      <SelectValue>
+                        {labels[expenseType ?? "VARIABLE"]}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {(
@@ -249,7 +262,11 @@ export function TransactionDialog({
                     }
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Pilih kategori" />
+                      <SelectValue>
+                        {filteredCategories.find(
+                          (item) => item.id === categoryId,
+                        )?.name ?? "Pilih kategori"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {filteredCategories.map((item) => (
@@ -272,7 +289,10 @@ export function TransactionDialog({
                   }
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Pilih tujuan" />
+                    <SelectValue>
+                      {goals.data.find((goal) => goal.id === savingGoalId)
+                        ?.name ?? "Pilih tujuan"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {goals.data.map((goal) => (
@@ -300,7 +320,10 @@ export function TransactionDialog({
                 }
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Pilih wallet" />
+                  <SelectValue>
+                    {wallets.data.find((wallet) => wallet.id === walletId)
+                      ?.name ?? "Pilih wallet"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {wallets.data.map((wallet) => (
@@ -314,7 +337,19 @@ export function TransactionDialog({
             </Field>
             <Field data-invalid={Boolean(form.formState.errors.date)}>
               <FieldLabel htmlFor="date">Tanggal</FieldLabel>
-              <Input id="date" type="date" {...form.register("date")} />
+              <Controller
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <DatePicker
+                    id="date"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    invalid={Boolean(form.formState.errors.date)}
+                  />
+                )}
+              />
               <FieldError errors={[form.formState.errors.date]} />
             </Field>
             <Field data-invalid={Boolean(form.formState.errors.note)}>

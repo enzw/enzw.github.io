@@ -3,12 +3,9 @@ import {
   BarChart3,
   HandCoins,
   LayoutDashboard,
-  LogOut,
-  Menu,
   PiggyBank,
   ReceiptText,
   Repeat2,
-  Settings,
   Tags,
   WalletCards,
 } from "lucide-react"
@@ -16,14 +13,6 @@ import {
 import { Brand } from "@/components/brand"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Sidebar,
   SidebarContent,
@@ -55,7 +44,7 @@ const navigation = [
 ] as const
 
 function UserMenu() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const { isMobile, state } = useSidebar()
   const compact = !isMobile && state === "collapsed"
   const initials = user?.name
@@ -66,62 +55,25 @@ function UserMenu() {
     .toUpperCase()
 
   return (
-    <div className="flex items-center gap-1">
-      <Button
-        variant="ghost"
-        className={
-          compact
-            ? "h-10 w-full justify-center px-0"
-            : "h-11 min-w-0 flex-1 justify-start px-2"
-        }
-        aria-label="Buka pengaturan profil"
-        render={<NavLink to="/settings" />}
-      >
-        <Avatar className="size-8">
-          <AvatarFallback className={user?.avatarEmoji ? "text-lg" : ""}>
-            {user?.avatarEmoji ?? initials}
-          </AvatarFallback>
-        </Avatar>
-        {!compact && (
-          <span className="min-w-0 flex-1 truncate text-left">{user?.name}</span>
-        )}
-      </Button>
+    <Button
+      variant="ghost"
+      className={
+        compact
+          ? "h-10 w-full justify-center px-0"
+          : "h-11 w-full min-w-0 justify-start px-2"
+      }
+      aria-label="Buka pengaturan profil"
+      render={<NavLink to="/settings" />}
+    >
+      <Avatar className="size-8">
+        <AvatarFallback className={user?.avatarEmoji ? "text-lg" : ""}>
+          {user?.avatarEmoji ?? initials}
+        </AvatarFallback>
+      </Avatar>
       {!compact && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Buka menu akun"
-              />
-            }
-          >
-            <Menu />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>
-              <span className="block truncate">{user?.name}</span>
-              <span className="block truncate text-xs font-normal text-muted-foreground">
-                {user?.email}
-              </span>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem render={<NavLink to="/settings" />}>
-              <Settings />
-              Pengaturan
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => void logout()}
-            >
-              <LogOut />
-              Keluar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <span className="min-w-0 flex-1 truncate text-left">{user?.name}</span>
       )}
-    </div>
+    </Button>
   )
 }
 

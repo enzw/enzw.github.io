@@ -1,11 +1,12 @@
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 import { Gauge, Loader2, Plus } from "lucide-react"
 import { toast } from "sonner"
 
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button"
 import { EmptyState } from "@/components/empty-state"
+import { CurrencyInput } from "@/components/forms/currency-input"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import {
@@ -64,6 +65,7 @@ function BudgetDialog({ onSaved }: { onSaved: () => void }) {
       amount: 0,
     },
   })
+  const categoryId = form.watch("categoryId")
 
   const submit = async (values: Values) => {
     try {
@@ -97,13 +99,19 @@ function BudgetDialog({ onSaved }: { onSaved: () => void }) {
             <Field>
               <FieldLabel>Jenis budget</FieldLabel>
               <Select
-                value={form.watch("categoryId")}
+                value={categoryId}
                 onValueChange={(value) =>
                   form.setValue("categoryId", value ?? "OVERALL")
                 }
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {categoryId === "OVERALL"
+                      ? "Keseluruhan pengeluaran"
+                      : categories.data.find(
+                          (category) => category.id === categoryId,
+                        )?.name ?? "Pilih kategori"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="OVERALL">
@@ -128,12 +136,21 @@ function BudgetDialog({ onSaved }: { onSaved: () => void }) {
             </Field>
             <Field data-invalid={Boolean(form.formState.errors.amount)}>
               <FieldLabel htmlFor="budget-amount">Batas budget</FieldLabel>
-              <Input
-                id="budget-amount"
-                type="number"
-                min="1"
-                aria-invalid={Boolean(form.formState.errors.amount)}
-                {...form.register("amount")}
+              <Controller
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <CurrencyInput
+                    id="budget-amount"
+                    name={field.name}
+                    ref={field.ref}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="0"
+                    aria-invalid={Boolean(form.formState.errors.amount)}
+                  />
+                )}
               />
               <FieldError errors={[form.formState.errors.amount]} />
             </Field>

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 import {
   CalendarClock,
@@ -13,6 +13,8 @@ import { toast } from "sonner"
 
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button"
 import { EmptyState } from "@/components/empty-state"
+import { CurrencyInput } from "@/components/forms/currency-input"
+import { DatePicker } from "@/components/forms/date-picker"
 import { PageHeader } from "@/components/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -34,6 +36,7 @@ import {
 } from "@/components/ui/dialog"
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -88,7 +91,12 @@ function WalletSelect({
       onValueChange={(nextValue) => onChange(nextValue ?? "NONE")}
     >
       <SelectTrigger className="w-full">
-        <SelectValue />
+        <SelectValue>
+          {value === "NONE"
+            ? "Belum ditentukan"
+            : wallets.find((wallet) => wallet.id === value)?.name ??
+              "Pilih wallet"}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="NONE">Belum ditentukan</SelectItem>
@@ -168,11 +176,21 @@ function SubscriptionDialog({
             </Field>
             <Field data-invalid={Boolean(form.formState.errors.amount)}>
               <FieldLabel htmlFor="sub-amount">Biaya bulanan</FieldLabel>
-              <Input
-                id="sub-amount"
-                type="number"
-                min="1"
-                {...form.register("amount")}
+              <Controller
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <CurrencyInput
+                    id="sub-amount"
+                    name={field.name}
+                    ref={field.ref}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="0"
+                    aria-invalid={Boolean(form.formState.errors.amount)}
+                  />
+                )}
               />
               <FieldError errors={[form.formState.errors.amount]} />
             </Field>
@@ -292,11 +310,23 @@ function DebtDialog({
               data-invalid={Boolean(form.formState.errors.originalAmount)}
             >
               <FieldLabel htmlFor="debt-original">Total awal</FieldLabel>
-              <Input
-                id="debt-original"
-                type="number"
-                min="1"
-                {...form.register("originalAmount")}
+              <Controller
+                control={form.control}
+                name="originalAmount"
+                render={({ field }) => (
+                  <CurrencyInput
+                    id="debt-original"
+                    name={field.name}
+                    ref={field.ref}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="0"
+                    aria-invalid={Boolean(
+                      form.formState.errors.originalAmount,
+                    )}
+                  />
+                )}
               />
               <FieldError errors={[form.formState.errors.originalAmount]} />
             </Field>
@@ -304,33 +334,70 @@ function DebtDialog({
               data-invalid={Boolean(form.formState.errors.remainingAmount)}
             >
               <FieldLabel htmlFor="debt-remaining">Sisa sekarang</FieldLabel>
-              <Input
-                id="debt-remaining"
-                type="number"
-                min="0"
-                placeholder={String(form.watch("originalAmount") || 0)}
-                {...form.register("remainingAmount")}
+              <Controller
+                control={form.control}
+                name="remainingAmount"
+                render={({ field }) => (
+                  <CurrencyInput
+                    id="debt-remaining"
+                    name={field.name}
+                    ref={field.ref}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="0"
+                    aria-invalid={Boolean(
+                      form.formState.errors.remainingAmount,
+                    )}
+                  />
+                )}
               />
+              <FieldDescription>
+                Isi 0 jika belum pernah membayar; sistem akan memakai total
+                awal.
+              </FieldDescription>
               <FieldError errors={[form.formState.errors.remainingAmount]} />
             </Field>
             <Field
               data-invalid={Boolean(form.formState.errors.monthlyPayment)}
             >
               <FieldLabel htmlFor="debt-payment">Rencana cicilan</FieldLabel>
-              <Input
-                id="debt-payment"
-                type="number"
-                min="0"
-                {...form.register("monthlyPayment")}
+              <Controller
+                control={form.control}
+                name="monthlyPayment"
+                render={({ field }) => (
+                  <CurrencyInput
+                    id="debt-payment"
+                    name={field.name}
+                    ref={field.ref}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="0"
+                    aria-invalid={Boolean(
+                      form.formState.errors.monthlyPayment,
+                    )}
+                  />
+                )}
               />
               <FieldError errors={[form.formState.errors.monthlyPayment]} />
             </Field>
             <Field data-invalid={Boolean(form.formState.errors.dueDate)}>
               <FieldLabel htmlFor="debt-date">Jatuh tempo</FieldLabel>
-              <Input
-                id="debt-date"
-                type="date"
-                {...form.register("dueDate")}
+              <Controller
+                control={form.control}
+                name="dueDate"
+                render={({ field }) => (
+                  <DatePicker
+                    id="debt-date"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    clearable
+                    invalid={Boolean(form.formState.errors.dueDate)}
+                    placeholder="Pilih jatuh tempo (opsional)"
+                  />
+                )}
               />
               <FieldError errors={[form.formState.errors.dueDate]} />
             </Field>

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 import {
   Banknote,
@@ -13,6 +13,7 @@ import { toast } from "sonner"
 
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button"
 import { EmptyState } from "@/components/empty-state"
+import { CurrencyInput } from "@/components/forms/currency-input"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import {
@@ -110,7 +111,7 @@ function WalletDialog({ onSaved }: { onSaved: () => void }) {
                 }
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue />
+                  <SelectValue>{labels[form.watch("type")]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {(["CASH", "BANK", "E_WALLET"] as const).map((type) => (
@@ -125,11 +126,23 @@ function WalletDialog({ onSaved }: { onSaved: () => void }) {
               data-invalid={Boolean(form.formState.errors.openingBalance)}
             >
               <FieldLabel htmlFor="wallet-balance">Saldo awal</FieldLabel>
-              <Input
-                id="wallet-balance"
-                type="number"
-                min="0"
-                {...form.register("openingBalance")}
+              <Controller
+                control={form.control}
+                name="openingBalance"
+                render={({ field }) => (
+                  <CurrencyInput
+                    id="wallet-balance"
+                    name={field.name}
+                    ref={field.ref}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="0"
+                    aria-invalid={Boolean(
+                      form.formState.errors.openingBalance,
+                    )}
+                  />
+                )}
               />
               <FieldError errors={[form.formState.errors.openingBalance]} />
             </Field>

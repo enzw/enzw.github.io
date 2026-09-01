@@ -1,11 +1,13 @@
 import { useState } from "react"
-import { useForm, useWatch } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 import { CalendarClock, Loader2, PiggyBank, Plus } from "lucide-react"
 import { toast } from "sonner"
 
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button"
 import { EmptyState } from "@/components/empty-state"
+import { CurrencyInput } from "@/components/forms/currency-input"
+import { DatePicker } from "@/components/forms/date-picker"
 import { PageHeader } from "@/components/page-header"
 import { TransactionDialog } from "@/components/transactions/transaction-dialog"
 import { Badge } from "@/components/ui/badge"
@@ -61,21 +63,22 @@ const DAY_IN_MS = 24 * 60 * 60 * 1000
 const AVERAGE_DAYS_PER_MONTH = 365.25 / 12
 
 function startOfToday() {
-  const today = new Date()
-  return new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
+  return startOfTodayDate().getTime()
 }
 
-function dateInputToday() {
+function startOfTodayDate() {
   const today = new Date()
-  const year = today.getFullYear()
-  const month = String(today.getMonth() + 1).padStart(2, "0")
-  const day = String(today.getDate()).padStart(2, "0")
-  return `${year}-${month}-${day}`
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate())
 }
 
 function calculateSavingPlan(targetAmount: number, targetDate: string) {
   const targetTime = new Date(`${targetDate}T00:00:00`).getTime()
-  if (!Number.isFinite(targetAmount) || targetAmount <= 0 || !targetDate || Number.isNaN(targetTime)) {
+  if (
+    !Number.isFinite(targetAmount) ||
+    targetAmount <= 0 ||
+    !targetDate ||
+    Number.isNaN(targetTime)
+  ) {
     return null
   }
 
@@ -156,11 +159,23 @@ function GoalDialog({ onSaved }: { onSaved: () => void }) {
             </Field>
             <Field data-invalid={Boolean(form.formState.errors.targetAmount)}>
               <FieldLabel htmlFor="goal-target">Target total</FieldLabel>
-              <Input
-                id="goal-target"
-                type="number"
-                min="1"
-                {...form.register("targetAmount")}
+              <Controller
+                control={form.control}
+                name="targetAmount"
+                render={({ field }) => (
+                  <CurrencyInput
+                    id="goal-target"
+                    name={field.name}
+                    ref={field.ref}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="0"
+                    aria-invalid={Boolean(
+                      form.formState.errors.targetAmount,
+                    )}
+                  />
+                )}
               />
               <FieldError errors={[form.formState.errors.targetAmount]} />
             </Field>
@@ -185,11 +200,20 @@ function GoalDialog({ onSaved }: { onSaved: () => void }) {
             </Field>
             <Field data-invalid={Boolean(form.formState.errors.targetDate)}>
               <FieldLabel htmlFor="goal-date">Target tanggal</FieldLabel>
-              <Input
-                id="goal-date"
-                type="date"
-                min={dateInputToday()}
-                {...form.register("targetDate")}
+              <Controller
+                control={form.control}
+                name="targetDate"
+                render={({ field }) => (
+                  <DatePicker
+                    id="goal-date"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    disabled={{ before: startOfTodayDate() }}
+                    invalid={Boolean(form.formState.errors.targetDate)}
+                    placeholder="Pilih tanggal target"
+                  />
+                )}
               />
               <FieldError errors={[form.formState.errors.targetDate]} />
             </Field>

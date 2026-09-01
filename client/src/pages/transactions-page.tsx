@@ -133,7 +133,9 @@ export function TransactionsPage({
             }
           >
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue>
+                {type === "ALL" ? "Semua jenis" : labels[type]}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">Semua jenis</SelectItem>
