@@ -40,6 +40,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { useAuth } from "@/features/auth/auth-context"
@@ -59,6 +60,8 @@ const navigation = [
 
 function UserMenu() {
   const { user, logout } = useAuth()
+  const { isMobile, state } = useSidebar()
+  const compact = !isMobile && state === "collapsed"
   const initials = user?.name
     .split(" ")
     .slice(0, 2)
@@ -70,14 +73,26 @@ function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" className="h-11 w-full justify-start px-2" />
+          <Button
+            variant="ghost"
+            className={
+              compact
+                ? "h-10 w-full justify-center px-0"
+                : "h-11 w-full justify-start px-2"
+            }
+            aria-label="Buka menu pengguna"
+          />
         }
       >
         <Avatar className="size-8">
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
-        <span className="min-w-0 flex-1 truncate text-left">{user?.name}</span>
-        <Menu className="size-4" />
+        {!compact && (
+          <>
+            <span className="min-w-0 flex-1 truncate text-left">{user?.name}</span>
+            <Menu className="size-4" />
+          </>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
@@ -100,6 +115,11 @@ function UserMenu() {
   )
 }
 
+function SidebarBrand() {
+  const { isMobile, state } = useSidebar()
+  return <Brand compact={!isMobile && state === "collapsed"} />
+}
+
 export function AppLayout() {
   const location = useLocation()
 
@@ -107,8 +127,8 @@ export function AppLayout() {
     <TooltipProvider>
       <SidebarProvider>
         <Sidebar collapsible="icon">
-          <SidebarHeader className="h-16 justify-center px-3">
-            <Brand />
+          <SidebarHeader className="h-16 items-start justify-center overflow-hidden px-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
+            <SidebarBrand />
           </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
