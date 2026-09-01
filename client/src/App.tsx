@@ -9,7 +9,7 @@ import { TransactionsPage } from "@/pages/transactions-page"
 import { WalletsPage } from "@/pages/wallets-page"
 import { AuthProvider, useAuth } from "@/features/auth/auth-context"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Toaster } from "@/components/ui/toast"
+import { Toaster } from "@/components/ui/sonner"
 
 function ProtectedApp() {
   const { user, loading } = useAuth()
