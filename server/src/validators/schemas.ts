@@ -11,6 +11,16 @@ export const registerSchema = z.object({
 
 export const loginSchema = z.object({ email: z.string().trim().toLowerCase().email(), password: z.string().min(1) })
 
+export const profileAvatars = [
+  "🐻", "🐶", "🐧", "🦊", "🐼",
+  "🐰", "🐱", "🐹", "🐥", "🦋",
+] as const
+
+export const profileSchema = z.object({
+  name: z.string().trim().min(2).max(60),
+  avatarEmoji: z.enum(profileAvatars).nullable(),
+})
+
 export const walletSchema = z.object({
   name: z.string().trim().min(2).max(40),
   type: z.enum(["CASH", "BANK", "E_WALLET"]),

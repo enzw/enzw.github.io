@@ -1,9 +1,11 @@
+import type { AvatarEmoji } from "@/lib/profile"
+
 export type TransactionType = "INCOME" | "EXPENSE" | "SAVING"
 export type IncomeType = "PRIMARY" | "SECONDARY"
 export type ExpenseType = "FIXED" | "VARIABLE" | "SUBSCRIPTION" | "DEBT" | "DISCRETIONARY"
 export type WalletType = "CASH" | "BANK" | "E_WALLET"
 
-export type User = { id: string; name: string; email: string }
+export type User = { id: string; name: string; email: string; avatarEmoji: AvatarEmoji | null }
 export type Wallet = { id: string; name: string; type: WalletType; openingBalance: number | string; balance: number }
 export type Category = { id: string; name: string; expenseType: ExpenseType; color?: string | null }
 export type SavingGoal = { id: string; name: string; targetAmount: number | string; targetDate?: string | null; priority: number; plannedMonthlyAmount: number | string; currentTotal: number; actualThisMonth: number }

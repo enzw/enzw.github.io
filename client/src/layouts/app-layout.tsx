@@ -70,48 +70,62 @@ function UserMenu() {
     .toUpperCase()
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            className={
-              compact
-                ? "h-10 w-full justify-center px-0"
-                : "h-11 w-full justify-start px-2"
-            }
-            aria-label="Buka menu pengguna"
-          />
+    <div className="flex items-center gap-1">
+      <Button
+        variant="ghost"
+        className={
+          compact
+            ? "h-10 w-full justify-center px-0"
+            : "h-11 min-w-0 flex-1 justify-start px-2"
         }
+        aria-label="Buka pengaturan profil"
+        render={<NavLink to="/settings" />}
       >
         <Avatar className="size-8">
-          <AvatarFallback>{initials}</AvatarFallback>
+          <AvatarFallback className={user?.avatarEmoji ? "text-lg" : ""}>
+            {user?.avatarEmoji ?? initials}
+          </AvatarFallback>
         </Avatar>
         {!compact && (
-          <>
-            <span className="min-w-0 flex-1 truncate text-left">{user?.name}</span>
-            <Menu className="size-4" />
-          </>
+          <span className="min-w-0 flex-1 truncate text-left">{user?.name}</span>
         )}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>
-          <span className="block truncate">{user?.name}</span>
-          <span className="block truncate text-xs font-normal text-muted-foreground">
-            {user?.email}
-          </span>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Settings />
-          Pengaturan
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => void logout()}>
-          <LogOut />
-          Keluar
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </Button>
+      {!compact && (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Buka menu akun"
+              />
+            }
+          >
+            <Menu />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>
+              <span className="block truncate">{user?.name}</span>
+              <span className="block truncate text-xs font-normal text-muted-foreground">
+                {user?.email}
+              </span>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem render={<NavLink to="/settings" />}>
+              <Settings />
+              Pengaturan
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => void logout()}
+            >
+              <LogOut />
+              Keluar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </div>
   )
 }
 

@@ -5,6 +5,7 @@ import { BudgetsPage } from "@/pages/budgets-page"
 import { CommitmentsPage } from "@/pages/commitments-page"
 import { DashboardPage } from "@/pages/dashboard-page"
 import { SavingsPage } from "@/pages/savings-page"
+import { SettingsPage } from "@/pages/settings-page"
 import { TransactionsPage } from "@/pages/transactions-page"
 import { WalletsPage } from "@/pages/wallets-page"
 import { AuthProvider, useAuth } from "@/features/auth/auth-context"
@@ -40,7 +41,7 @@ export default function App() {
           <Route path="subscriptions" element={<CommitmentsPage kind="subscriptions" />} />
           <Route path="debts" element={<CommitmentsPage kind="debts" />} />
           <Route path="statistics" element={<DashboardPage statisticsOnly />} />
-          <Route path="settings" element={<Navigate to="/" replace />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -5,9 +5,16 @@ import { env } from "../config/env.js"
 import { requireAuth, signToken } from "../middlewares/auth.js"
 import { authRateLimit } from "../middlewares/rate-limit.js"
 import { HttpError } from "../utils/http-error.js"
-import { loginSchema, registerSchema } from "../validators/schemas.js"
+import { loginSchema, profileSchema, registerSchema } from "../validators/schemas.js"
 
 export const authRouter = Router()
+
+const publicUserSelect = {
+  id: true,
+  name: true,
+  email: true,
+  avatarEmoji: true,
+} as const
 
 const defaultCategories = [
   ["Kos & tagihan", "FIXED", "#7c3aed"], ["Makanan", "VARIABLE", "#16a34a"],
@@ -37,7 +44,7 @@ authRouter.post("/register", authRateLimit, async (req, res, next) => {
         wallets: { create: { name: "Cash", type: "CASH", openingBalance: 0 } },
         categories: { create: defaultCategories.map(([name, expenseType, color]) => ({ name, expenseType, color })) },
       },
-      select: { id: true, name: true, email: true },
+      select: publicUserSelect,
     })
     setAuthCookie(res, signToken(user.id))
     res.status(201).json({ user })
@@ -52,7 +59,14 @@ authRouter.post("/login", authRateLimit, async (req, res, next) => {
       throw new HttpError(401, "Email atau kata sandi salah.")
     }
     setAuthCookie(res, signToken(user.id))
-    res.json({ user: { id: user.id, name: user.name, email: user.email } })
+    res.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatarEmoji: user.avatarEmoji,
+      },
+    })
   } catch (error) { next(error) }
 })
 
@@ -63,8 +77,24 @@ authRouter.post("/logout", (_req, res) => {
 
 authRouter.get("/me", requireAuth, async (req, res, next) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { id: true, name: true, email: true } })
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: publicUserSelect })
     if (!user) throw new HttpError(401, "Pengguna tidak ditemukan.")
+    res.json({ user })
+  } catch (error) { next(error) }
+})
+
+authRouter.patch("/profile", requireAuth, async (req, res, next) => {
+  try {
+    const input = profileSchema.parse(req.body)
+    const result = await prisma.user.updateMany({
+      where: { id: req.userId },
+      data: input,
+    })
+    if (!result.count) throw new HttpError(404, "Pengguna tidak ditemukan.")
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: publicUserSelect,
+    })
     res.json({ user })
   } catch (error) { next(error) }
 })
