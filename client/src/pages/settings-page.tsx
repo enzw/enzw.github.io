@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Camera, Check, Loader2, Palette, UserRound } from "lucide-react"
+import { Camera, Check, Loader2, LogOut, Palette, UserRound } from "lucide-react"
 import { toast } from "sonner"
 
 import { PageHeader } from "@/components/page-header"
@@ -98,8 +98,9 @@ function AvatarGroup({
 }
 
 export function SettingsPage() {
-  const { user, setUser } = useAuth()
+  const { user, setUser, logout } = useAuth()
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
   const [avatarEmoji, setAvatarEmoji] = useState<AvatarEmoji | null>(
     user?.avatarEmoji ?? null,
   )
@@ -136,6 +137,16 @@ export function SettingsPage() {
       toast.error("Gagal memperbarui profil", {
         description: errorMessage(cause),
       })
+    }
+  }
+
+  const handleLogout = async () => {
+    setLoggingOut(true)
+    try {
+      await logout()
+    } catch (cause) {
+      toast.error("Gagal keluar", { description: errorMessage(cause) })
+      setLoggingOut(false)
     }
   }
 
@@ -242,28 +253,54 @@ export function SettingsPage() {
             </form>
           </CardContent>
         </Card>
-        <Card className="h-fit">
-          <CardHeader>
-            <span className="mb-2 grid size-10 place-items-center rounded-2xl bg-primary/10 text-primary">
-              <Palette className="size-5" />
-            </span>
-            <CardTitle>Tema avatar</CardTitle>
-            <CardDescription>
-              Warna tema mengikuti kelompok avatar setelah profil disimpan.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex items-center justify-between rounded-2xl bg-muted/60 p-3">
-              <span className="flex items-center gap-2">
-                <UserRound className="size-4" /> Tema terpilih
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <span className="mb-2 grid size-10 place-items-center rounded-2xl bg-primary/10 text-primary">
+                <Palette className="size-5" />
               </span>
-              <Badge>{maleTheme ? "Cowok" : "Cewek"}</Badge>
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Mode terang atau gelap tetap mengikuti pengaturan sistem perangkatmu.
-            </p>
-          </CardContent>
-        </Card>
+              <CardTitle>Tema avatar</CardTitle>
+              <CardDescription>
+                Warna tema mengikuti kelompok avatar setelah profil disimpan.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="flex items-center justify-between rounded-2xl bg-muted/60 p-3">
+                <span className="flex items-center gap-2">
+                  <UserRound className="size-4" /> Tema terpilih
+                </span>
+                <Badge>{maleTheme ? "Cowok" : "Cewek"}</Badge>
+              </div>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Mode terang atau gelap tetap mengikuti pengaturan sistem perangkatmu.
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Akun</CardTitle>
+              <CardDescription>
+                Keluar dari akun WangWang pada perangkat ini.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                type="button"
+                variant="destructive"
+                className="w-full"
+                disabled={loggingOut}
+                onClick={() => void handleLogout()}
+              >
+                {loggingOut ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <LogOut />
+                )}
+                Keluar dari akun
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

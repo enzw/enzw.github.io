@@ -33,8 +33,6 @@ export default function App() {
         <Route element={<ProtectedApp />}>
           <Route index element={<DashboardPage />} />
           <Route path="transactions" element={<TransactionsPage />} />
-          <Route path="income" element={<TransactionsPage initialType="INCOME" />} />
-          <Route path="expenses" element={<TransactionsPage initialType="EXPENSE" />} />
           <Route path="budgets" element={<BudgetsPage />} />
           <Route path="savings" element={<SavingsPage />} />
           <Route path="wallets" element={<WalletsPage />} />

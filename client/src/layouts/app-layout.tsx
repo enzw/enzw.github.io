@@ -1,8 +1,6 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom"
 import {
   BarChart3,
-  CircleDollarSign,
-  CreditCard,
   HandCoins,
   LayoutDashboard,
   LogOut,
@@ -48,8 +46,6 @@ import { useAuth } from "@/features/auth/auth-context"
 const navigation = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/transactions", label: "Transaksi", icon: ReceiptText },
-  { to: "/income", label: "Pemasukan", icon: CircleDollarSign },
-  { to: "/expenses", label: "Pengeluaran", icon: CreditCard },
   { to: "/budgets", label: "Budget", icon: Tags },
   { to: "/savings", label: "Tabungan", icon: PiggyBank },
   { to: "/wallets", label: "Wallet", icon: WalletCards },
