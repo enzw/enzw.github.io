@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import {
   ArrowDownLeft,
+  ArrowRightLeft,
   ArrowUpRight,
   PiggyBank,
   ReceiptText,
@@ -39,12 +40,48 @@ import {
   labels,
 } from "@/lib/format"
 import { api, errorMessage } from "@/services/api"
-import type { Transaction, TransactionType } from "@/types/finance"
+import type {
+  TransactionHistoryItem,
+  TransactionType,
+} from "@/types/finance"
+
+type HistoryType = TransactionType | "TRANSFER"
 
 const iconByType = {
   INCOME: ArrowDownLeft,
   EXPENSE: ArrowUpRight,
   SAVING: PiggyBank,
+  TRANSFER: ArrowRightLeft,
+}
+
+function activityName(item: TransactionHistoryItem) {
+  if (item.type === "TRANSFER") {
+    return item.note || `${item.fromWallet.name} ke ${item.toWallet.name}`
+  }
+  return (
+    item.note ||
+    item.category?.name ||
+    item.savingGoal?.name ||
+    labels[item.type]
+  )
+}
+
+function activityWallet(item: TransactionHistoryItem) {
+  return item.type === "TRANSFER"
+    ? `${item.fromWallet.name} ke ${item.toWallet.name}`
+    : item.wallet.name
+}
+
+function activityClassification(item: TransactionHistoryItem) {
+  if (item.type === "TRANSFER") return "Transfer internal"
+  if (item.incomeType) return labels[item.incomeType]
+  if (item.expenseType) return labels[item.expenseType]
+  return "Tabungan"
+}
+
+function amountPrefix(item: TransactionHistoryItem) {
+  if (item.type === "TRANSFER") return ""
+  return item.type === "INCOME" ? "+" : "−"
 }
 
 export function TransactionsPage({
@@ -54,10 +91,10 @@ export function TransactionsPage({
 }) {
   const [params] = useSearchParams()
   const [month, setMonth] = useState(currentMonth())
-  const [type, setType] = useState<TransactionType | "ALL">(
+  const [type, setType] = useState<HistoryType | "ALL">(
     initialType ?? "ALL",
   )
-  const [items, setItems] = useState<Transaction[]>([])
+  const [items, setItems] = useState<TransactionHistoryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -67,7 +104,9 @@ export function TransactionsPage({
     try {
       const query = new URLSearchParams({ month })
       if (type !== "ALL") query.set("type", type)
-      const { data } = await api.get<{ transactions: Transaction[] }>(
+      const { data } = await api.get<{
+        transactions: TransactionHistoryItem[]
+      }>(
         `/transactions?${query}`,
       )
       setItems(data.transactions)
@@ -83,14 +122,25 @@ export function TransactionsPage({
   }, [load])
 
   const total = useMemo(
-    () => items.reduce((sum, item) => sum + Number(item.amount), 0),
-    [items],
+    () => items.reduce(
+      (sum, item) =>
+        item.type === "TRANSFER" && type !== "TRANSFER"
+          ? sum
+          : sum + Number(item.amount),
+      0,
+    ),
+    [items, type],
   )
 
-  const remove = async (id: string) => {
+  const remove = async (item: TransactionHistoryItem) => {
     try {
-      await api.delete(`/transactions/${id}`)
-      toast.success("Transaksi dihapus")
+      const isTransfer = item.type === "TRANSFER"
+      await api.delete(
+        isTransfer
+          ? `/wallets/transfers/${item.id}`
+          : `/transactions/${item.id}`,
+      )
+      toast.success(isTransfer ? "Transfer dihapus" : "Transaksi dihapus")
       await load()
     } catch (cause) {
       toast.error("Gagal menghapus", { description: errorMessage(cause) })
@@ -129,7 +179,7 @@ export function TransactionsPage({
           <Select
             value={type}
             onValueChange={(value) =>
-              setType(value as TransactionType | "ALL")
+              setType(value as HistoryType | "ALL")
             }
           >
             <SelectTrigger>
@@ -139,7 +189,7 @@ export function TransactionsPage({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">Semua jenis</SelectItem>
-              {(["INCOME", "EXPENSE", "SAVING"] as const).map((value) => (
+              {(["INCOME", "EXPENSE", "SAVING", "TRANSFER"] as const).map((value) => (
                 <SelectItem value={value} key={value}>
                   {labels[value]}
                 </SelectItem>
@@ -148,7 +198,7 @@ export function TransactionsPage({
           </Select>
         )}
         <p className="ml-auto text-sm text-muted-foreground">
-          Total{" "}
+          {type === "TRANSFER" ? "Total dipindahkan" : "Total"}{" "}
           <strong className="finance-number text-foreground">
             {formatCurrency(total)}
           </strong>
@@ -177,7 +227,7 @@ export function TransactionsPage({
             <EmptyState
               icon={ReceiptText}
               title="Belum ada transaksi"
-              description="Mulai dengan mencatat pemasukan, pengeluaran, atau tabungan pertamamu."
+              description="Mulai dengan mencatat pemasukan, pengeluaran, tabungan, atau transfer pertamamu."
               action={
                 <TransactionDialog
                   initialType={initialType}
@@ -190,11 +240,6 @@ export function TransactionsPage({
               <div className="divide-y md:hidden">
                 {items.map((item) => {
                   const Icon = iconByType[item.type]
-                  const name =
-                    item.note ||
-                    item.category?.name ||
-                    item.savingGoal?.name ||
-                    labels[item.type]
                   return (
                     <div className="flex items-center gap-3 p-4" key={item.id}>
                       <span
@@ -203,31 +248,39 @@ export function TransactionsPage({
                             ? "bg-emerald-500/10 text-emerald-600"
                             : item.type === "SAVING"
                               ? "bg-blue-500/10 text-blue-600"
-                              : "bg-rose-500/10 text-rose-600"
+                              : item.type === "TRANSFER"
+                                ? "bg-primary/10 text-primary"
+                                : "bg-rose-500/10 text-rose-600"
                         }`}
                       >
                         <Icon className="size-5" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">{name}</p>
+                        <p className="truncate font-medium">
+                          {activityName(item)}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          {formatDate(item.date)} · {item.wallet.name}
+                          {formatDate(item.date)} · {activityWallet(item)}
                         </p>
                       </div>
                       <div className="flex items-center gap-1">
                         <p
                           className={`finance-number font-semibold ${
-                            item.type === "INCOME" ? "text-emerald-600" : ""
+                            item.type === "INCOME"
+                              ? "text-emerald-600"
+                              : item.type === "EXPENSE"
+                                ? "text-primary"
+                                : ""
                           }`}
                         >
-                          {item.type === "INCOME" ? "+" : "−"}
+                          {amountPrefix(item)}
                           {formatCurrency(item.amount)}
                         </p>
                         <ConfirmDeleteButton
-                          label="Hapus transaksi"
-                          title="Hapus transaksi?"
-                          description="Ringkasan keuangan dan saldo wallet akan dihitung ulang."
-                          onConfirm={() => remove(item.id)}
+                          label={item.type === "TRANSFER" ? "Hapus transfer" : "Hapus transaksi"}
+                          title={item.type === "TRANSFER" ? "Hapus transfer?" : "Hapus transaksi?"}
+                          description={item.type === "TRANSFER" ? "Saldo wallet asal dan tujuan akan dikembalikan seperti sebelum transfer." : "Ringkasan keuangan dan saldo wallet akan dihitung ulang."}
+                          onConfirm={() => remove(item)}
                         />
                       </div>
                     </div>
@@ -257,10 +310,7 @@ export function TransactionsPage({
                             </span>
                             <div>
                               <p className="font-medium">
-                                {item.note ||
-                                  item.category?.name ||
-                                  item.savingGoal?.name ||
-                                  labels[item.type]}
+                                {activityName(item)}
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 {labels[item.type]}
@@ -270,29 +320,29 @@ export function TransactionsPage({
                         </TableCell>
                         <TableCell>
                           <Badge variant="secondary">
-                            {item.incomeType
-                              ? labels[item.incomeType]
-                              : item.expenseType
-                                ? labels[item.expenseType]
-                                : "Tabungan"}
+                            {activityClassification(item)}
                           </Badge>
                         </TableCell>
-                        <TableCell>{item.wallet.name}</TableCell>
+                        <TableCell>{activityWallet(item)}</TableCell>
                         <TableCell>{formatDate(item.date)}</TableCell>
                         <TableCell
                           className={`finance-number text-right font-semibold ${
-                            item.type === "INCOME" ? "text-emerald-600" : ""
+                            item.type === "INCOME"
+                              ? "text-emerald-600"
+                              : item.type === "EXPENSE"
+                                ? "text-primary"
+                                : ""
                           }`}
                         >
-                          {item.type === "INCOME" ? "+" : "−"}
+                          {amountPrefix(item)}
                           {formatCurrency(item.amount)}
                         </TableCell>
                         <TableCell>
                           <ConfirmDeleteButton
-                            label="Hapus transaksi"
-                            title="Hapus transaksi?"
-                            description="Ringkasan keuangan dan saldo wallet akan dihitung ulang."
-                            onConfirm={() => remove(item.id)}
+                            label={item.type === "TRANSFER" ? "Hapus transfer" : "Hapus transaksi"}
+                            title={item.type === "TRANSFER" ? "Hapus transfer?" : "Hapus transaksi?"}
+                            description={item.type === "TRANSFER" ? "Saldo wallet asal dan tujuan akan dikembalikan seperti sebelum transfer." : "Ringkasan keuangan dan saldo wallet akan dihitung ulang."}
+                            onConfirm={() => remove(item)}
                           />
                         </TableCell>
                       </TableRow>

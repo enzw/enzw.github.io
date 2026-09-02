@@ -22,11 +22,52 @@ async function validateRelations(userId: string, walletId?: string, categoryId?:
 transactionRouter.get("/", async (req, res, next) => {
   try {
     const { start, end } = monthRange(typeof req.query.month === "string" ? req.query.month : undefined)
-    const type = typeof req.query.type === "string" && ["INCOME", "EXPENSE", "SAVING"].includes(req.query.type) ? req.query.type as "INCOME" | "EXPENSE" | "SAVING" : undefined
-    const transactions = await prisma.transaction.findMany({
-      where: { userId: req.userId, date: { gte: start, lt: end }, ...(type ? { type } : {}) }, include, orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+    const allowedTypes = ["INCOME", "EXPENSE", "SAVING", "TRANSFER"] as const
+    type HistoryType = typeof allowedTypes[number]
+    const type = typeof req.query.type === "string" && allowedTypes.includes(req.query.type as HistoryType)
+      ? req.query.type as HistoryType
+      : undefined
+    const transactionType = type && type !== "TRANSFER" ? type : undefined
+    const [transactions, transfers] = await Promise.all([
+      type === "TRANSFER"
+        ? Promise.resolve([])
+        : prisma.transaction.findMany({
+            where: {
+              userId: req.userId,
+              date: { gte: start, lt: end },
+              ...(transactionType ? { type: transactionType } : {}),
+            },
+            include,
+            orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+          }),
+      type && type !== "TRANSFER"
+        ? Promise.resolve([])
+        : prisma.walletTransfer.findMany({
+            where: { userId: req.userId, date: { gte: start, lt: end } },
+            include: {
+              fromWallet: { select: { id: true, name: true } },
+              toWallet: { select: { id: true, name: true } },
+            },
+            orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+          }),
+    ])
+    const activities = [
+      ...transactions,
+      ...transfers.map((transfer) => ({
+        id: transfer.id,
+        type: "TRANSFER" as const,
+        amount: transfer.amount,
+        date: transfer.date,
+        note: transfer.note,
+        fromWallet: transfer.fromWallet,
+        toWallet: transfer.toWallet,
+        createdAt: transfer.createdAt,
+      })),
+    ].sort((a, b) => {
+      const dateDifference = b.date.getTime() - a.date.getTime()
+      return dateDifference || b.createdAt.getTime() - a.createdAt.getTime()
     })
-    res.json({ transactions })
+    res.json({ transactions: activities })
   } catch (error) { next(error) }
 })
 

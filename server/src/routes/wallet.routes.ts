@@ -114,6 +114,16 @@ walletRouter.patch("/:id", async (req, res, next) => {
   } catch (error) { next(error) }
 })
 
+walletRouter.delete("/transfers/:id", async (req, res, next) => {
+  try {
+    const result = await prisma.walletTransfer.deleteMany({
+      where: { id: req.params.id, userId: req.userId },
+    })
+    if (!result.count) throw new HttpError(404, "Transfer tidak ditemukan.")
+    res.status(204).send()
+  } catch (error) { next(error) }
+})
+
 walletRouter.delete("/:id", async (req, res, next) => {
   try {
     const [transactionCount, transferCount] = await Promise.all([

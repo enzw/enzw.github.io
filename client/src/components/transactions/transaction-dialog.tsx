@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -34,7 +35,7 @@ import {
 } from "@/components/ui/select"
 import { useFinanceData } from "@/hooks/use-finance-data"
 import { zodResolver } from "@/lib/form-resolver"
-import { currentMonth, labels } from "@/lib/format"
+import { currentMonth, formatCurrency, labels } from "@/lib/format"
 import { api, errorMessage } from "@/services/api"
 import type {
   Category,
@@ -45,8 +46,10 @@ import type {
   Wallet,
 } from "@/types/finance"
 
+type FormTransactionType = TransactionType | "TRANSFER"
+
 const formSchema = z.object({
-  type: z.enum(["INCOME", "EXPENSE", "SAVING"]),
+  type: z.enum(["INCOME", "EXPENSE", "SAVING", "TRANSFER"]),
   amount: z.coerce.number().positive("Nominal harus lebih dari 0"),
   walletId: z.string().min(1, "Pilih wallet"),
   date: z.string().min(1, "Tanggal wajib diisi"),
@@ -57,6 +60,33 @@ const formSchema = z.object({
     .optional(),
   categoryId: z.string().optional(),
   savingGoalId: z.string().optional(),
+  toWalletId: z.string().optional(),
+}).superRefine((data, context) => {
+  if (data.type === "SAVING" && !data.savingGoalId) {
+    context.addIssue({
+      code: "custom",
+      path: ["savingGoalId"],
+      message: "Pilih tujuan tabungan",
+    })
+  }
+  if (data.type === "TRANSFER" && !data.toWalletId) {
+    context.addIssue({
+      code: "custom",
+      path: ["toWalletId"],
+      message: "Pilih wallet tujuan",
+    })
+  }
+  if (
+    data.type === "TRANSFER" &&
+    data.toWalletId &&
+    data.walletId === data.toWalletId
+  ) {
+    context.addIssue({
+      code: "custom",
+      path: ["toWalletId"],
+      message: "Wallet tujuan harus berbeda",
+    })
+  }
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -92,6 +122,7 @@ export function TransactionDialog({
       expenseType: "VARIABLE",
       categoryId: "",
       savingGoalId: "",
+      toWalletId: "",
     },
   })
 
@@ -100,6 +131,7 @@ export function TransactionDialog({
   const walletId = form.watch("walletId")
   const categoryId = form.watch("categoryId")
   const savingGoalId = form.watch("savingGoalId")
+  const toWalletId = form.watch("toWalletId")
   const incomeType = form.watch("incomeType")
 
   useEffect(() => {
@@ -115,22 +147,49 @@ export function TransactionDialog({
   const submit = async (values: FormValues) => {
     setServerError("")
     try {
-      await api.post("/transactions", {
-        ...values,
-        incomeType: values.type === "INCOME" ? values.incomeType : null,
-        expenseType: values.type === "EXPENSE" ? values.expenseType : null,
-        categoryId:
-          values.type === "EXPENSE" && values.categoryId
-            ? values.categoryId
-            : null,
-        savingGoalId:
-          values.type === "SAVING" && values.savingGoalId
-            ? values.savingGoalId
-            : null,
-      })
-      toast.success("Transaksi tersimpan", {
-        description: "Ringkasan keuangan sudah diperbarui.",
-      })
+      if (values.type === "TRANSFER") {
+        const sourceWallet = wallets.data.find(
+          (wallet) => wallet.id === values.walletId,
+        )
+        if (sourceWallet && values.amount > sourceWallet.balance) {
+          form.setError("amount", {
+            message: "Nominal melebihi saldo wallet asal",
+          })
+          return
+        }
+        await api.post("/wallets/transfers", {
+          fromWalletId: values.walletId,
+          toWalletId: values.toWalletId,
+          amount: values.amount,
+          date: values.date,
+          note: values.note,
+        })
+      } else {
+        await api.post("/transactions", {
+          ...values,
+          incomeType: values.type === "INCOME" ? values.incomeType : null,
+          expenseType: values.type === "EXPENSE" ? values.expenseType : null,
+          categoryId:
+            values.type === "EXPENSE" && values.categoryId
+              ? values.categoryId
+              : null,
+          savingGoalId:
+            values.type === "SAVING" && values.savingGoalId
+              ? values.savingGoalId
+              : null,
+        })
+      }
+      toast.success(
+        values.type === "TRANSFER"
+          ? "Saldo berhasil dipindahkan"
+          : "Transaksi tersimpan",
+        {
+          description:
+            values.type === "TRANSFER"
+              ? "Saldo wallet asal dan tujuan sudah diperbarui."
+              : "Ringkasan keuangan sudah diperbarui.",
+        },
+      )
       setOpen(false)
       form.reset({ ...values, amount: 0, note: "" })
       onSaved?.()
@@ -142,6 +201,22 @@ export function TransactionDialog({
   const filteredCategories = categories.data.filter(
     (item) => item.expenseType === expenseType,
   )
+
+  const selectTransactionType = (nextType: FormTransactionType) => {
+    form.setValue("type", nextType)
+    if (nextType !== "TRANSFER") return
+
+    const source =
+      wallets.data.find((wallet) => wallet.type === "BANK") ?? wallets.data[0]
+    const destination =
+      wallets.data.find(
+        (wallet) => wallet.type === "CASH" && wallet.id !== source?.id,
+      ) ?? wallets.data.find((wallet) => wallet.id !== source?.id)
+    form.setValue("walletId", source?.id ?? "", { shouldValidate: true })
+    form.setValue("toWalletId", destination?.id ?? "", {
+      shouldValidate: true,
+    })
+  }
 
   return (
     <>
@@ -168,16 +243,22 @@ export function TransactionDialog({
               <Select
                 value={type}
                 onValueChange={(value) =>
-                  form.setValue("type", value as TransactionType)
+                  selectTransactionType(value as FormTransactionType)
                 }
               >
                 <SelectTrigger className="w-full">
                   <SelectValue>{labels[type]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {(["INCOME", "EXPENSE", "SAVING"] as const).map(
+                  {(["INCOME", "EXPENSE", "SAVING", "TRANSFER"] as const).map(
                     (value) => (
-                      <SelectItem key={value} value={value}>
+                      <SelectItem
+                        key={value}
+                        value={value}
+                        disabled={
+                          value === "TRANSFER" && wallets.data.length < 2
+                        }
+                      >
                         {labels[value]}
                       </SelectItem>
                     ),
@@ -331,14 +412,26 @@ export function TransactionDialog({
               </Field>
             )}
             <Field data-invalid={Boolean(form.formState.errors.walletId)}>
-              <FieldLabel>Wallet</FieldLabel>
+              <FieldLabel>
+                {type === "TRANSFER" ? "Wallet asal" : "Wallet"}
+              </FieldLabel>
               <Select
                 value={walletId}
-                onValueChange={(value) =>
-                  form.setValue("walletId", value ?? "", {
+                onValueChange={(value) => {
+                  const nextWalletId = value ?? ""
+                  form.setValue("walletId", nextWalletId, {
                     shouldValidate: true,
                   })
-                }
+                  if (type === "TRANSFER" && nextWalletId === toWalletId) {
+                    form.setValue(
+                      "toWalletId",
+                      wallets.data.find(
+                        (wallet) => wallet.id !== nextWalletId,
+                      )?.id ?? "",
+                      { shouldValidate: true },
+                    )
+                  }
+                }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue>
@@ -354,8 +447,49 @@ export function TransactionDialog({
                   ))}
                 </SelectContent>
               </Select>
+              {type === "TRANSFER" && walletId && (
+                <FieldDescription>
+                  Saldo tersedia {formatCurrency(
+                    wallets.data.find((wallet) => wallet.id === walletId)
+                      ?.balance ?? 0,
+                  )}
+                </FieldDescription>
+              )}
               <FieldError errors={[form.formState.errors.walletId]} />
             </Field>
+            {type === "TRANSFER" && (
+              <Field
+                data-invalid={Boolean(form.formState.errors.toWalletId)}
+              >
+                <FieldLabel>Wallet tujuan</FieldLabel>
+                <Select
+                  value={toWalletId}
+                  onValueChange={(value) =>
+                    form.setValue("toWalletId", value ?? "", {
+                      shouldValidate: true,
+                    })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue>
+                      {wallets.data.find(
+                        (wallet) => wallet.id === toWalletId,
+                      )?.name ?? "Pilih wallet tujuan"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {wallets.data
+                      .filter((wallet) => wallet.id !== walletId)
+                      .map((wallet) => (
+                        <SelectItem key={wallet.id} value={wallet.id}>
+                          {wallet.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <FieldError errors={[form.formState.errors.toWalletId]} />
+              </Field>
+            )}
             <Field data-invalid={Boolean(form.formState.errors.date)}>
               <FieldLabel htmlFor="date">Tanggal</FieldLabel>
               <Controller
@@ -379,7 +513,11 @@ export function TransactionDialog({
               </FieldLabel>
               <Input
                 id="note"
-                placeholder="Contoh: Makan siang"
+                placeholder={
+                  type === "TRANSFER"
+                    ? "Contoh: Tarik tunai ATM"
+                    : "Contoh: Makan siang"
+                }
                 {...form.register("note")}
               />
               <FieldError errors={[form.formState.errors.note]} />
@@ -401,7 +539,7 @@ export function TransactionDialog({
             disabled={form.formState.isSubmitting}
           >
             {form.formState.isSubmitting && <Loader2 className="animate-spin" />}
-            Simpan transaksi
+            {type === "TRANSFER" ? "Pindahkan saldo" : "Simpan transaksi"}
           </Button>
         </DialogFooter>
       </DialogContent>
