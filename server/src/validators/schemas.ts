@@ -27,6 +27,17 @@ export const walletSchema = z.object({
   openingBalance: z.coerce.number().min(0).default(0),
 })
 
+export const walletTransferSchema = z.object({
+  fromWalletId: z.string().uuid(),
+  toWalletId: z.string().uuid(),
+  amount: money,
+  date: z.coerce.date(),
+  note: z.string().trim().max(200).nullish(),
+}).refine((data) => data.fromWalletId !== data.toWalletId, {
+  message: "Wallet asal dan tujuan harus berbeda",
+  path: ["toWalletId"],
+})
+
 export const categorySchema = z.object({
   name: z.string().trim().min(2, "Nama minimal 2 karakter").max(40),
   expenseType: z.enum([

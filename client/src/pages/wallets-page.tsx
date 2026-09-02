@@ -15,6 +15,7 @@ import { ConfirmDeleteButton } from "@/components/confirm-delete-button"
 import { EmptyState } from "@/components/empty-state"
 import { CurrencyInput } from "@/components/forms/currency-input"
 import { PageHeader } from "@/components/page-header"
+import { TransferDialog } from "@/components/wallets/transfer-dialog"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -193,7 +194,12 @@ export function WalletsPage() {
       <PageHeader
         title="Wallet"
         description="Saldo virtual berdasarkan seluruh transaksi yang kamu catat."
-        action={<WalletDialog onSaved={() => void wallets.refresh()} />}
+        action={
+          <div className="flex flex-wrap gap-2">
+            <TransferDialog wallets={wallets.data} onSaved={wallets.refresh} />
+            <WalletDialog onSaved={() => void wallets.refresh()} />
+          </div>
+        }
       />
       <Card className="mb-4 bg-foreground text-background">
         <CardContent>
@@ -240,7 +246,7 @@ export function WalletsPage() {
                     <ConfirmDeleteButton
                       label="Hapus wallet"
                       title="Hapus wallet?"
-                      description="Wallet hanya dapat dihapus jika belum memiliki transaksi."
+                      description="Wallet hanya dapat dihapus jika belum memiliki transaksi atau riwayat transfer."
                       onConfirm={() => remove(wallet.id)}
                     />
                   </div>

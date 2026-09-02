@@ -32,37 +32,58 @@ enum ExpenseType {
 }
 
 model User {
-  id            String         @id @default(uuid()) @db.Uuid
-  name          String
-  email         String         @unique
-  passwordHash  String
-  avatarEmoji   String?
-  wallets       Wallet[]
-  categories    Category[]
-  transactions  Transaction[]
-  budgets       Budget[]
-  savingGoals   SavingGoal[]
-  subscriptions Subscription[]
-  debts         Debt[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id              String           @id @default(uuid()) @db.Uuid
+  name            String
+  email           String           @unique
+  passwordHash    String
+  avatarEmoji     String?
+  wallets         Wallet[]
+  categories      Category[]
+  transactions    Transaction[]
+  budgets         Budget[]
+  savingGoals     SavingGoal[]
+  subscriptions   Subscription[]
+  debts           Debt[]
+  walletTransfers WalletTransfer[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
 model Wallet {
-  id             String         @id @default(uuid()) @db.Uuid
-  userId         String         @db.Uuid
-  name           String
-  type           WalletType
-  openingBalance Decimal        @default(0) @db.Decimal(18, 2)
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions   Transaction[]
-  subscriptions  Subscription[]
-  debts          Debt[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id                String           @id @default(uuid()) @db.Uuid
+  userId            String           @db.Uuid
+  name              String
+  type              WalletType
+  openingBalance    Decimal          @default(0) @db.Decimal(18, 2)
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions      Transaction[]
+  subscriptions     Subscription[]
+  debts             Debt[]
+  outgoingTransfers WalletTransfer[] @relation("TransferFromWallet")
+  incomingTransfers WalletTransfer[] @relation("TransferToWallet")
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
   @@unique([userId, name])
   @@index([userId])
+}
+
+model WalletTransfer {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  fromWalletId String   @db.Uuid
+  toWalletId   String   @db.Uuid
+  amount       Decimal  @db.Decimal(18, 2)
+  date         DateTime
+  note         String?
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromWallet   Wallet   @relation("TransferFromWallet", fields: [fromWalletId], references: [id], onDelete: Restrict)
+  toWallet     Wallet   @relation("TransferToWallet", fields: [toWalletId], references: [id], onDelete: Restrict)
+  createdAt    DateTime @default(now())
+
+  @@index([userId, date])
+  @@index([fromWalletId])
+  @@index([toWalletId])
 }
 
 model Category {
@@ -138,37 +159,37 @@ model SavingGoal {
 }
 
 model Subscription {
-  id         String    @id @default(uuid()) @db.Uuid
-  userId     String    @db.Uuid
-  walletId   String?   @db.Uuid
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  walletId   String?  @db.Uuid
   name       String
-  amount     Decimal   @db.Decimal(18, 2)
+  amount     Decimal  @db.Decimal(18, 2)
   billingDay Int
-  isActive   Boolean   @default(true)
+  isActive   Boolean  @default(true)
   note       String?
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  wallet     Wallet?   @relation(fields: [walletId], references: [id], onDelete: SetNull)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallet     Wallet?  @relation(fields: [walletId], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([userId])
 }
 
 model Debt {
-  id             String    @id @default(uuid()) @db.Uuid
-  userId         String    @db.Uuid
-  walletId       String?   @db.Uuid
-  name           String
-  originalAmount Decimal   @db.Decimal(18, 2)
-  remainingAmount Decimal  @db.Decimal(18, 2)
-  monthlyPayment Decimal?  @db.Decimal(18, 2)
-  dueDate        DateTime?
-  isPaid         Boolean   @default(false)
-  note           String?
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  wallet         Wallet?   @relation(fields: [walletId], references: [id], onDelete: SetNull)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @db.Uuid
+  walletId        String?   @db.Uuid
+  name            String
+  originalAmount  Decimal   @db.Decimal(18, 2)
+  remainingAmount Decimal   @db.Decimal(18, 2)
+  monthlyPayment  Decimal?  @db.Decimal(18, 2)
+  dueDate         DateTime?
+  isPaid          Boolean   @default(false)
+  note            String?
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallet          Wallet?   @relation(fields: [walletId], references: [id], onDelete: SetNull)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([userId])
 }
