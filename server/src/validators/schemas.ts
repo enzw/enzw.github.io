@@ -77,6 +77,11 @@ export const savingGoalSchema = z.object({
   targetDate: z.coerce.date().nullish(),
   priority: z.coerce.number().int().min(1).max(99).default(1),
   plannedMonthlyAmount: z.coerce.number().min(0).default(0),
+  isShared: z.boolean().default(false),
+})
+
+export const joinSavingGoalSchema = z.object({
+  code: z.string().trim().regex(/^\d{6}$/, "Kode harus terdiri dari 6 angka"),
 })
 
 export const subscriptionSchema = z.object({

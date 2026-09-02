@@ -32,21 +32,22 @@ enum ExpenseType {
 }
 
 model User {
-  id              String           @id @default(uuid()) @db.Uuid
-  name            String
-  email           String           @unique
-  passwordHash    String
-  avatarEmoji     String?
-  wallets         Wallet[]
-  categories      Category[]
-  transactions    Transaction[]
-  budgets         Budget[]
-  savingGoals     SavingGoal[]
-  subscriptions   Subscription[]
-  debts           Debt[]
-  walletTransfers WalletTransfer[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id                    String             @id @default(uuid()) @db.Uuid
+  name                  String
+  email                 String             @unique
+  passwordHash          String
+  avatarEmoji           String?
+  wallets               Wallet[]
+  categories            Category[]
+  transactions          Transaction[]
+  budgets               Budget[]
+  savingGoals           SavingGoal[]
+  savingGoalMemberships SavingGoalMember[]
+  subscriptions         Subscription[]
+  debts                 Debt[]
+  walletTransfers       WalletTransfer[]
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
 }
 
 model Wallet {
@@ -142,20 +143,34 @@ model Budget {
 }
 
 model SavingGoal {
-  id                   String        @id @default(uuid()) @db.Uuid
-  userId               String        @db.Uuid
+  id                   String             @id @default(uuid()) @db.Uuid
+  userId               String             @db.Uuid
   name                 String
-  targetAmount         Decimal       @db.Decimal(18, 2)
+  targetAmount         Decimal            @db.Decimal(18, 2)
   targetDate           DateTime?
-  priority             Int           @default(1)
-  plannedMonthlyAmount Decimal       @default(0) @db.Decimal(18, 2)
-  isActive             Boolean       @default(true)
-  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  priority             Int                @default(1)
+  plannedMonthlyAmount Decimal            @default(0) @db.Decimal(18, 2)
+  isActive             Boolean            @default(true)
+  isShared             Boolean            @default(false)
+  shareCode            String?            @unique @db.Char(6)
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  members              SavingGoalMember[]
   transactions         Transaction[]
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
 
   @@index([userId, priority])
+}
+
+model SavingGoalMember {
+  savingGoalId String     @db.Uuid
+  userId       String     @db.Uuid
+  savingGoal   SavingGoal @relation(fields: [savingGoalId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt     DateTime   @default(now())
+
+  @@id([savingGoalId, userId])
+  @@index([userId])
 }
 
 model Subscription {

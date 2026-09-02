@@ -12,7 +12,7 @@ async function validateRelations(userId: string, walletId?: string, categoryId?:
   const [wallet, category, savingGoal] = await Promise.all([
     walletId ? prisma.wallet.findFirst({ where: { id: walletId, userId }, select: { id: true } }) : null,
     categoryId ? prisma.category.findFirst({ where: { id: categoryId, userId }, select: { id: true } }) : null,
-    savingGoalId ? prisma.savingGoal.findFirst({ where: { id: savingGoalId, userId }, select: { id: true } }) : null,
+    savingGoalId ? prisma.savingGoal.findFirst({ where: { id: savingGoalId, OR: [{ userId }, { members: { some: { userId } } }] }, select: { id: true } }) : null,
   ])
   if (walletId && !wallet) throw new HttpError(400, "Wallet tidak valid.")
   if (categoryId && !category) throw new HttpError(400, "Kategori tidak valid.")
