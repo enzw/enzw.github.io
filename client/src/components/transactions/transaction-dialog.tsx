@@ -4,6 +4,7 @@ import { z } from "zod"
 import { Loader2, Plus } from "lucide-react"
 import { toast } from "sonner"
 
+import { CategoryDialog } from "@/components/categories/category-dialog"
 import { Button } from "@/components/ui/button"
 import { CurrencyInput } from "@/components/forms/currency-input"
 import { DatePicker } from "@/components/forms/date-picker"
@@ -27,6 +28,7 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
@@ -58,6 +60,7 @@ const formSchema = z.object({
 })
 
 type FormValues = z.infer<typeof formSchema>
+const ADD_CATEGORY_VALUE = "__add_category__"
 
 export function TransactionDialog({
   initialType = "EXPENSE",
@@ -69,6 +72,7 @@ export function TransactionDialog({
   openByDefault?: boolean
 }) {
   const [open, setOpen] = useState(openByDefault)
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
   const [serverError, setServerError] = useState("")
   const wallets = useFinanceData<Wallet>("/wallets", "wallets")
   const categories = useFinanceData<Category>("/categories", "categories")
@@ -140,7 +144,8 @@ export function TransactionDialog({
   )
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button />}>
         <Plus />
         Tambah transaksi
@@ -261,9 +266,13 @@ export function TransactionDialog({
                   <FieldLabel>Kategori</FieldLabel>
                   <Select
                     value={categoryId}
-                    onValueChange={(value) =>
+                    onValueChange={(value) => {
+                      if (value === ADD_CATEGORY_VALUE) {
+                        setCategoryDialogOpen(true)
+                        return
+                      }
                       form.setValue("categoryId", value ?? "")
-                    }
+                    }}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue>
@@ -278,6 +287,14 @@ export function TransactionDialog({
                           {item.name}
                         </SelectItem>
                       ))}
+                      <SelectSeparator />
+                      <SelectItem
+                        value={ADD_CATEGORY_VALUE}
+                        className="text-primary"
+                      >
+                        <Plus />
+                        Tambah kategori baru
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
@@ -388,6 +405,18 @@ export function TransactionDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+      <CategoryDialog
+        open={categoryDialogOpen}
+        onOpenChange={setCategoryDialogOpen}
+        showTrigger={false}
+        initialExpenseType={expenseType ?? "VARIABLE"}
+        onSaved={async (category) => {
+          form.setValue("expenseType", category.expenseType)
+          await categories.refresh()
+          form.setValue("categoryId", category.id, { shouldValidate: true })
+        }}
+      />
+    </>
   )
 }

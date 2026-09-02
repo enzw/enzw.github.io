@@ -96,7 +96,7 @@ function calculateSavingPlan(targetAmount: number, targetDate: string) {
   }
 }
 
-function GoalDialog({ onSaved }: { onSaved: () => void }) {
+function GoalDialog({ onSaved }: { onSaved: () => Promise<void> }) {
   const [open, setOpen] = useState(false)
   const form = useForm<Values>({
     resolver: zodResolver(schema),
@@ -122,9 +122,9 @@ function GoalDialog({ onSaved }: { onSaved: () => void }) {
         ...values,
         plannedMonthlyAmount: plan.monthlyAmount,
       })
+      await onSaved()
       toast.success("Tujuan tabungan dibuat")
       setOpen(false)
-      onSaved()
     } catch (cause) {
       toast.error("Gagal menyimpan", { description: errorMessage(cause) })
     }
@@ -278,7 +278,7 @@ export function SavingsPage() {
               initialType="SAVING"
               onSaved={() => void goals.refresh()}
             />
-            <GoalDialog onSaved={() => void goals.refresh()} />
+            <GoalDialog onSaved={goals.refresh} />
           </div>
         }
       />
@@ -300,7 +300,7 @@ export function SavingsPage() {
             icon={PiggyBank}
             title="Belum ada tujuan tabungan"
             description="Buat tujuan seperti dana darurat, laptop, atau liburan agar menabung lebih terarah."
-            action={<GoalDialog onSaved={() => void goals.refresh()} />}
+            action={<GoalDialog onSaved={goals.refresh} />}
           />
         </Card>
       ) : (
