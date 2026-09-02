@@ -1,7 +1,7 @@
-import express from "express"
+import express, { type RequestHandler } from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-import * as helmetModule from "helmet"
+import helmetModule from "helmet"
 import morgan from "morgan"
 import { env } from "./config/env.js"
 import { requireAuth } from "./middlewares/auth.js"
@@ -15,8 +15,9 @@ import { transactionRouter } from "./routes/transaction.routes.js"
 import { walletRouter } from "./routes/wallet.routes.js"
 
 export const app = express()
+const createHelmet = helmetModule as unknown as () => RequestHandler
 
-app.use(helmetModule.default())
+app.use(createHelmet())
 app.use(cors({ origin: env.CLIENT_URL, credentials: true }))
 app.use(express.json({ limit: "100kb" }))
 app.use(cookieParser())
