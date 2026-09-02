@@ -35,3 +35,5 @@ app.use("/api/dashboard", requireAuth, dashboardRouter)
 
 app.use(notFound)
 app.use(errorHandler)
+
+export default app
