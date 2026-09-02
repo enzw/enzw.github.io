@@ -1,7 +1,7 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-import helmet from "helmet"
+import * as helmetModule from "helmet"
 import morgan from "morgan"
 import { env } from "./config/env.js"
 import { requireAuth } from "./middlewares/auth.js"
@@ -16,7 +16,7 @@ import { walletRouter } from "./routes/wallet.routes.js"
 
 export const app = express()
 
-app.use(helmet())
+app.use(helmetModule.default())
 app.use(cors({ origin: env.CLIENT_URL, credentials: true }))
 app.use(express.json({ limit: "100kb" }))
 app.use(cookieParser())
