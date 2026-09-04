@@ -153,6 +153,7 @@ model SavingGoal {
   isActive             Boolean            @default(true)
   isShared             Boolean            @default(false)
   shareCode            String?            @unique @db.Char(6)
+  shareCodeExpiresAt   DateTime?
   user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   members              SavingGoalMember[]
   transactions         Transaction[]

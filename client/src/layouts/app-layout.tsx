@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { NavLink, Outlet, useLocation } from "react-router-dom"
 import {
   BarChart3,
@@ -82,12 +83,24 @@ function SidebarBrand() {
   return <Brand compact={!isMobile && state === "collapsed"} />
 }
 
+function MobileSidebarAutoClose() {
+  const { pathname } = useLocation()
+  const { setOpenMobile } = useSidebar()
+
+  useEffect(() => {
+    setOpenMobile(false)
+  }, [pathname, setOpenMobile])
+
+  return null
+}
+
 export function AppLayout() {
   const location = useLocation()
 
   return (
     <TooltipProvider>
       <SidebarProvider>
+        <MobileSidebarAutoClose />
         <Sidebar collapsible="icon">
           <SidebarHeader className="h-16 items-start justify-center overflow-hidden px-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
             <SidebarBrand />

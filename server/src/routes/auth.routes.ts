@@ -55,9 +55,8 @@ authRouter.post("/login", authRateLimit, async (req, res, next) => {
   try {
     const input = loginSchema.parse(req.body)
     const user = await prisma.user.findUnique({ where: { email: input.email } })
-    if (!user || !(await bcrypt.compare(input.password, user.passwordHash))) {
-      throw new HttpError(401, "Email atau kata sandi salah.")
-    }
+    if (!user) throw new HttpError(404, "Akun dengan email ini belum terdaftar. Silakan daftar terlebih dahulu.")
+    if (!(await bcrypt.compare(input.password, user.passwordHash))) throw new HttpError(401, "Kata sandi salah.")
     setAuthCookie(res, signToken(user.id))
     res.json({
       user: {

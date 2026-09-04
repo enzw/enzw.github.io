@@ -1,4 +1,4 @@
-import { useId, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 import {
@@ -9,6 +9,7 @@ import {
   Pencil,
   PiggyBank,
   Plus,
+  RefreshCw,
   UsersRound,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -320,7 +321,7 @@ function GoalDialog({
               </Select>
               <FieldDescription>
                 {isShared
-                  ? "Kode unik enam digit akan dibuat agar orang lain dapat bergabung."
+                  ? "Kode unik enam digit berlaku selama 15 menit dan dapat diganti kapan saja."
                   : goal?.isShared
                     ? "Mengubah ke pribadi akan mengeluarkan seluruh anggota dari tujuan ini."
                     : "Hanya kamu yang dapat melihat dan mengisi tujuan ini."}
@@ -375,7 +376,7 @@ function JoinGoalDialog({ onJoined }: { onJoined: () => Promise<void> }) {
         <DialogHeader>
           <DialogTitle>Gabung tabungan bersama</DialogTitle>
           <DialogDescription>
-            Masukkan kode enam digit yang diberikan pemilik tujuan tabungan.
+            Masukkan kode enam digit yang masih berlaku dari pemilik tujuan tabungan.
           </DialogDescription>
         </DialogHeader>
         <form className="space-y-4" onSubmit={form.handleSubmit(submit)}>
@@ -464,6 +465,94 @@ function LeaveGoalButton({ goal, onLeft }: { goal: SavingGoal; onLeft: () => Pro
   )
 }
 
+function ShareCodeControl({
+  goal,
+  onUpdated,
+}: {
+  goal: SavingGoal
+  onUpdated: () => Promise<void>
+}) {
+  const [remainingSeconds, setRemainingSeconds] = useState(
+    goal.shareCodeExpiresInSeconds ?? 0,
+  )
+  const [loading, setLoading] = useState(false)
+  const hasActiveCode = Boolean(goal.shareCode && remainingSeconds > 0)
+  const minutes = Math.floor(remainingSeconds / 60)
+  const seconds = remainingSeconds % 60
+
+  useEffect(() => {
+    if (!goal.shareCode || !goal.shareCodeExpiresInSeconds) return
+
+    const timer = window.setInterval(() => {
+      setRemainingSeconds((value) => {
+        if (value <= 1) {
+          window.clearInterval(timer)
+          return 0
+        }
+        return value - 1
+      })
+    }, 1_000)
+    return () => window.clearInterval(timer)
+  }, [goal.shareCode, goal.shareCodeExpiresInSeconds])
+
+  const copyCode = async () => {
+    if (!goal.shareCode) return
+    try {
+      await navigator.clipboard.writeText(goal.shareCode)
+      toast.success("Kode tabungan disalin")
+    } catch {
+      toast.error("Kode belum dapat disalin")
+    }
+  }
+
+  const replaceCode = async () => {
+    setLoading(true)
+    try {
+      await api.post(`/savings/${goal.id}/share-code`)
+      await onUpdated()
+      toast.success(hasActiveCode ? "Kode tabungan diganti" : "Kode tabungan dibuat")
+    } catch (cause) {
+      toast.error("Kode belum dapat dibuat", { description: errorMessage(cause) })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-1.5">
+      <div className="flex flex-wrap justify-end gap-1">
+        {hasActiveCode && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="font-mono tracking-widest"
+            onClick={() => void copyCode()}
+          >
+            {goal.shareCode}
+            <Copy />
+          </Button>
+        )}
+        <Button
+          type="button"
+          variant={hasActiveCode ? "ghost" : "outline"}
+          size="sm"
+          disabled={loading}
+          onClick={() => void replaceCode()}
+        >
+          <RefreshCw className={loading ? "animate-spin" : ""} />
+          {hasActiveCode ? "Ganti" : "Buat kode"}
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {hasActiveCode
+          ? `Berlaku ${minutes}:${seconds.toString().padStart(2, "0")}`
+          : "Kode sudah kedaluwarsa"}
+      </p>
+    </div>
+  )
+}
+
 export function SavingsPage() {
   const goals = useFinanceData<SavingGoal>(
     `/savings?month=${currentMonth()}`,
@@ -477,15 +566,6 @@ export function SavingsPage() {
       await goals.refresh()
     } catch (cause) {
       toast.error("Gagal menghapus", { description: errorMessage(cause) })
-    }
-  }
-
-  const copyCode = async (code: string) => {
-    try {
-      await navigator.clipboard.writeText(code)
-      toast.success("Kode tabungan disalin")
-    } catch {
-      toast.error("Kode belum dapat disalin")
     }
   }
 
@@ -609,17 +689,12 @@ export function SavingsPage() {
                           </p>
                         </div>
                       </div>
-                      {goal.isOwner && goal.shareCode && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="font-mono tracking-widest"
-                          onClick={() => void copyCode(goal.shareCode!)}
-                        >
-                          {goal.shareCode}
-                          <Copy />
-                        </Button>
+                      {goal.isOwner && (
+                        <ShareCodeControl
+                          key={`${goal.id}-${goal.shareCode ?? "expired"}`}
+                          goal={goal}
+                          onUpdated={goals.refresh}
+                        />
                       )}
                     </div>
                   )}

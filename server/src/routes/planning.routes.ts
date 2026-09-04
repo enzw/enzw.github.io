@@ -8,11 +8,18 @@ import { budgetSchema, joinSavingGoalSchema, savingGoalSchema } from "../validat
 export const budgetRouter = Router()
 export const savingRouter = Router()
 
-async function generateUniqueShareCode() {
+const SHARE_CODE_TTL_MS = 15 * 60_000
+
+async function generateShareCode() {
   for (let attempt = 0; attempt < 20; attempt += 1) {
     const shareCode = String(randomInt(100000, 1000000))
     const existing = await prisma.savingGoal.findUnique({ where: { shareCode }, select: { id: true } })
-    if (!existing) return shareCode
+    if (!existing) {
+      return {
+        shareCode,
+        shareCodeExpiresAt: new Date(Date.now() + SHARE_CODE_TTL_MS),
+      }
+    }
   }
 
   throw new HttpError(503, "Kode berbagi belum dapat dibuat. Silakan coba lagi.")
@@ -54,6 +61,7 @@ budgetRouter.delete("/:id", async (req, res, next) => {
 savingRouter.get("/", async (req, res, next) => {
   try {
     const { start, end } = monthRange(typeof req.query.month === "string" ? req.query.month : undefined)
+    const now = new Date()
     const goals = await prisma.savingGoal.findMany({
       where: {
         OR: [
@@ -72,10 +80,14 @@ savingRouter.get("/", async (req, res, next) => {
       orderBy: [{ priority: "asc" }, { createdAt: "asc" }],
     })
     res.json({
-      goals: goals.map(({ transactions, members, user, shareCode, ...goal }) => ({
+      goals: goals.map(({ transactions, members, user, shareCode, shareCodeExpiresAt, ...goal }) => ({
         ...goal,
         isOwner: goal.userId === req.userId,
-        shareCode: goal.userId === req.userId ? shareCode : null,
+        shareCode: goal.userId === req.userId && shareCodeExpiresAt && shareCodeExpiresAt > now ? shareCode : null,
+        shareCodeExpiresAt: goal.userId === req.userId ? shareCodeExpiresAt : null,
+        shareCodeExpiresInSeconds: goal.userId === req.userId && shareCodeExpiresAt
+          ? Math.max(0, Math.ceil((shareCodeExpiresAt.getTime() - now.getTime()) / 1_000))
+          : 0,
         owner: user,
         participants: [user, ...members.map((member) => member.user)],
         currentTotal: transactions.reduce((sum, item) => sum + Number(item.amount), 0),
@@ -88,8 +100,10 @@ savingRouter.get("/", async (req, res, next) => {
 savingRouter.post("/", async (req, res, next) => {
   try {
     const input = savingGoalSchema.parse(req.body)
-    const shareCode = input.isShared ? await generateUniqueShareCode() : null
-    const goal = await prisma.savingGoal.create({ data: { ...input, shareCode, userId: req.userId!, targetDate: input.targetDate ?? null } })
+    const shareCodeData = input.isShared
+      ? await generateShareCode()
+      : { shareCode: null, shareCodeExpiresAt: null }
+    const goal = await prisma.savingGoal.create({ data: { ...input, ...shareCodeData, userId: req.userId!, targetDate: input.targetDate ?? null } })
     res.status(201).json({ goal })
   } catch (error) { next(error) }
 })
@@ -97,8 +111,9 @@ savingRouter.post("/", async (req, res, next) => {
 savingRouter.post("/join", async (req, res, next) => {
   try {
     const { code } = joinSavingGoalSchema.parse(req.body)
-    const goal = await prisma.savingGoal.findUnique({ where: { shareCode: code }, select: { id: true, userId: true, name: true, isShared: true, isActive: true } })
+    const goal = await prisma.savingGoal.findUnique({ where: { shareCode: code }, select: { id: true, userId: true, name: true, isShared: true, isActive: true, shareCodeExpiresAt: true } })
     if (!goal || !goal.isShared || !goal.isActive) throw new HttpError(404, "Kode tabungan tidak ditemukan atau sudah tidak aktif.")
+    if (!goal.shareCodeExpiresAt || goal.shareCodeExpiresAt <= new Date()) throw new HttpError(410, "Kode tabungan sudah kedaluwarsa. Minta pemilik membuat kode baru.")
     if (goal.userId === req.userId) throw new HttpError(409, "Kamu adalah pemilik tujuan tabungan ini.")
 
     await prisma.savingGoalMember.upsert({
@@ -110,18 +125,42 @@ savingRouter.post("/join", async (req, res, next) => {
   } catch (error) { next(error) }
 })
 
+savingRouter.post("/:id/share-code", async (req, res, next) => {
+  try {
+    const current = await prisma.savingGoal.findFirst({
+      where: { id: req.params.id, userId: req.userId, isShared: true, isActive: true },
+      select: { id: true },
+    })
+    if (!current) throw new HttpError(404, "Tujuan tabungan bersama tidak ditemukan atau kamu bukan pemiliknya.")
+
+    const shareCodeData = await generateShareCode()
+    const goal = await prisma.savingGoal.update({
+      where: { id: current.id },
+      data: shareCodeData,
+      select: { shareCode: true, shareCodeExpiresAt: true },
+    })
+    res.json({ goal })
+  } catch (error) { next(error) }
+})
+
 savingRouter.patch("/:id", async (req, res, next) => {
   try {
     const input = savingGoalSchema.partial().parse(req.body)
     const current = await prisma.savingGoal.findFirst({ where: { id: req.params.id, userId: req.userId } })
     if (!current) throw new HttpError(404, "Tujuan tabungan tidak ditemukan atau kamu bukan pemiliknya.")
 
-    let shareCode = current.shareCode
-    if (input.isShared === true && !shareCode) shareCode = await generateUniqueShareCode()
-    if (input.isShared === false) shareCode = null
+    let shareCodeData = {
+      shareCode: current.shareCode,
+      shareCodeExpiresAt: current.shareCodeExpiresAt,
+    }
+    const remainsShared = input.isShared ?? current.isShared
+    if (remainsShared && (!current.shareCode || !current.shareCodeExpiresAt || current.shareCodeExpiresAt <= new Date())) {
+      shareCodeData = await generateShareCode()
+    }
+    if (!remainsShared) shareCodeData = { shareCode: null, shareCodeExpiresAt: null }
 
     const [goal] = await prisma.$transaction([
-      prisma.savingGoal.update({ where: { id: current.id }, data: { ...input, shareCode } }),
+      prisma.savingGoal.update({ where: { id: current.id }, data: { ...input, ...shareCodeData } }),
       ...(input.isShared === false
         ? [prisma.savingGoalMember.deleteMany({ where: { savingGoalId: current.id } })]
         : []),
